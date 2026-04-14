@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUALI-FLEG — Traçabilité</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --green-dark: #1A4731;
+    --green-mid: #2D6A4F;
+    --green-acc: #52B788;
+    --green-light: #D8F3DC;
+    --green-pale: #F0FAF2;
+    --white: #FFFFFF;
+    --gray-100: #F8F9FA;
+    --gray-200: #E9ECEF;
+    --gray-400: #ADB5BD;
+    --gray-600: #6C757D;
+    --gray-800: #343A40;
+    --red: #DC3545;
+    --yellow: #FFC107;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(26,71,49,0.10);
+    --shadow-lg: 0 8px 40px rgba(26,71,49,0.18);
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+font-family: ‘DM Sans’, sans-serif;
+background: var(–gray-100);
+color: var(–gray-800);
+min-height: 100vh;
+}
+
+/* ── LOGIN ── */
+#loginScreen {
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+background: linear-gradient(135deg, var(–green-dark) 0%, var(–green-mid) 100%);
+}
+.login-box {
+background: white;
+border-radius: 20px;
+padding: 48px 40px;
+width: 100%;
+max-width: 400px;
+box-shadow: var(–shadow-lg);
+text-align: center;
+}
+.login-logo {
+font-size: 28px;
+font-weight: 700;
+color: var(–green-dark);
+letter-spacing: -0.5px;
+margin-bottom: 4px;
+}
+.login-sub {
+font-size: 13px;
+color: var(–gray-600);
+margin-bottom: 36px;
+}
+.login-box input {
+width: 100%;
+padding: 14px 18px;
+border: 2px solid var(–gray-200);
+border-radius: var(–radius);
+font-family: ‘DM Mono’, monospace;
+font-size: 15px;
+margin-bottom: 16px;
+outline: none;
+transition: border-color 0.2s;
+}
+.login-box input:focus { border-color: var(–green-acc); }
+.login-box button {
+width: 100%;
+padding: 14px;
+background: var(–green-dark);
+color: white;
+border: none;
+border-radius: var(–radius);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.2s, transform 0.1s;
+}
+.login-box button:hover { background: var(–green-mid); transform: translateY(-1px); }
+.login-error { color: var(–red); font-size: 13px; margin-top: 8px; display: none; }
+
+/* ── APP SHELL ── */
+#app { display: none; }
+
+.topbar {
+background: var(–green-dark);
+color: white;
+padding: 0 24px;
+height: 60px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: sticky;
+top: 0;
+z-index: 100;
+box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-logo { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.topbar-badge {
+background: var(–green-acc);
+color: white;
+font-size: 10px;
+font-weight: 600;
+padding: 3px 8px;
+border-radius: 20px;
+letter-spacing: 0.5px;
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.btn-logout {
+background: rgba(255,255,255,0.15);
+color: white;
+border: none;
+padding: 7px 14px;
+border-radius: 8px;
+font-size: 13px;
+cursor: pointer;
+font-family: ‘DM Sans’, sans-serif;
+transition: background 0.2s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+/* ── TABS ── */
+.tabs {
+background: white;
+border-bottom: 2px solid var(–gray-200);
+display: flex;
+overflow-x: auto;
+padding: 0 24px;
+gap: 4px;
+}
+.tab {
+padding: 14px 18px;
+font-size: 13px;
+font-weight: 500;
+color: var(–gray-600);
+cursor: pointer;
+border-bottom: 2.5px solid transparent;
+margin-bottom: -2px;
+white-space: nowrap;
+transition: color 0.2s, border-color 0.2s;
+}
+.tab:hover { color: var(–green-mid); }
+.tab.active { color: var(–green-dark); border-color: var(–green-dark); font-weight: 600; }
+
+/* ── CONTENT ── */
+.content { padding: 28px 24px; max-width: 1400px; margin: 0 auto; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── CARDS ── */
+.stats-row {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+gap: 16px;
+margin-bottom: 28px;
+}
+.stat-card {
+background: white;
+border-radius: var(–radius);
+padding: 20px;
+box-shadow: var(–shadow);
+border-left: 4px solid var(–green-acc);
+}
+.stat-num { font-size: 28px; font-weight: 700; color: var(–green-dark); }
+.stat-label { font-size: 12px; color: var(–gray-600); margin-top: 4px; font-weight: 500; }
+
+/* ── TABLE CARD ── */
+.card {
+background: white;
+border-radius: var(–radius);
+box-shadow: var(–shadow);
+overflow: hidden;
+}
+.card-header {
+padding: 20px 24px;
+border-bottom: 1px solid var(–gray-200);
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: gap;
+gap: 12px;
+}
+.card-title { font-size: 16px; font-weight: 700; color: var(–green-dark); }
+
+.btn {
+padding: 9px 18px;
+border-radius: 8px;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+border: none;
+transition: all 0.2s;
+}
+.btn-primary { background: var(–green-dark); color: white; }
+.btn-primary:hover { background: var(–green-mid); transform: translateY(-1px); }
+.btn-secondary { background: var(–gray-200); color: var(–gray-800); }
+.btn-secondary:hover { background: var(–gray-400); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-danger { background: #FFEBEE; color: var(–red); }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: var(–green-dark); }
+thead th {
+color: white;
+padding: 12px 14px;
+text-align: left;
+font-size: 11px;
+font-weight: 600;
+letter-spacing: 0.5px;
+white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(–gray-200); transition: background 0.15s; }
+tbody tr:hover { background: var(–green-pale); }
+tbody td { padding: 12px 14px; vertical-align: middle; }
+.lot-num {
+font-family: ‘DM Mono’, monospace;
+font-size: 12px;
+font-weight: 500;
+color: var(–green-dark);
+background: var(–green-light);
+padding: 4px 8px;
+border-radius: 6px;
+cursor: pointer;
+text-decoration: underline;
+white-space: nowrap;
+}
+.badge {
+display: inline-block;
+padding: 3px 10px;
+border-radius: 20px;
+font-size: 11px;
+font-weight: 600;
+}
+.badge-green { background: var(–green-light); color: var(–green-dark); }
+.badge-yellow { background: #FFF9C4; color: #856404; }
+.badge-red { background: #FFEBEE; color: var(–red); }
+.badge-gray { background: var(–gray-200); color: var(–gray-600); }
+
+/* ── MODAL ── */
+.modal-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.5);
+z-index: 200;
+align-items: center;
+justify-content: center;
+padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+background: white;
+border-radius: 20px;
+width: 100%;
+max-width: 620px;
+max-height: 90vh;
+overflow-y: auto;
+box-shadow: var(–shadow-lg);
+animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+from { transform: translateY(30px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+.modal-header {
+padding: 24px 28px 16px;
+border-bottom: 1px solid var(–gray-200);
+display: flex;
+justify-content: space-between;
+align-items: center;
+position: sticky;
+top: 0;
+background: white;
+z-index: 1;
+}
+.modal-title { font-size: 17px; font-weight: 700; color: var(–green-dark); }
+.modal-close {
+width: 32px; height: 32px;
+border-radius: 50%;
+border: none;
+background: var(–gray-200);
+font-size: 18px;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: background 0.2s;
+}
+.modal-close:hover { background: var(–gray-400); }
+.modal-body { padding: 24px 28px; }
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 12px; font-weight: 600; color: var(–gray-600); letter-spacing: 0.3px; }
+input, select, textarea {
+padding: 10px 14px;
+border: 2px solid var(–gray-200);
+border-radius: 8px;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14px;
+outline: none;
+transition: border-color 0.2s;
+background: white;
+}
+input:focus, select:focus, textarea:focus { border-color: var(–green-acc); }
+textarea { resize: vertical; min-height: 80px; }
+.form-actions {
+display: flex;
+gap: 10px;
+justify-content: flex-end;
+margin-top: 24px;
+padding-top: 16px;
+border-top: 1px solid var(–gray-200);
+}
+
+/* ── LOT DETAIL ── */
+.lot-detail-header {
+background: linear-gradient(135deg, var(–green-dark), var(–green-mid));
+color: white;
+padding: 28px;
+border-radius: 16px;
+margin-bottom: 20px;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+gap: 20px;
+flex-wrap: wrap;
+}
+.lot-detail-num {
+font-family: ‘DM Mono’, monospace;
+font-size: 22px;
+font-weight: 500;
+letter-spacing: 1px;
+}
+.lot-detail-product { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.detail-item { background: white; border-radius: 10px; padding: 16px; box-shadow: var(–shadow); }
+.detail-item-label { font-size: 11px; color: var(–gray-600); font-weight: 600; margin-bottom: 4px; }
+.detail-item-value { font-size: 15px; font-weight: 600; color: var(–gray-800); }
+
+/* ── QR ── */
+#qrContainer { background: white; padding: 16px; border-radius: 12px; display: inline-block; }
+
+/* ── FICHE IMAGE ── */
+.fiche-link-box {
+background: var(–green-pale);
+border: 2px dashed var(–green-acc);
+border-radius: 12px;
+padding: 20px;
+text-align: center;
+margin-top: 16px;
+}
+.fiche-link-box input {
+width: 100%;
+margin-bottom: 12px;
+font-family: ‘DM Mono’, monospace;
+font-size: 12px;
+}
+
+/* ── EMPTY STATE ── */
+.empty {
+text-align: center;
+padding: 60px 20px;
+color: var(–gray-400);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; }
+
+/* ── LOADING ── */
+.loading {
+text-align: center;
+padding: 40px;
+color: var(–gray-600);
+font-size: 14px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+.content { padding: 16px; }
+.form-grid { grid-template-columns: 1fr; }
+.lot-detail-header { flex-direction: column; }
+.card-header { flex-direction: column; align-items: flex-start; }
+}
+
+.search-bar {
+width: 100%;
+max-width: 320px;
+padding: 9px 14px;
+border: 2px solid var(–gray-200);
+border-radius: 8px;
+font-size: 13px;
+outline: none;
+font-family: ‘DM Sans’, sans-serif;
+}
+.search-bar:focus { border-color: var(–green-acc); }
+
+.lot-num-preview {
+background: var(–green-pale);
+border: 1px solid var(–green-acc);
+border-radius: 8px;
+padding: 10px 14px;
+font-family: ‘DM Mono’, monospace;
+font-size: 14px;
+color: var(–green-dark);
+font-weight: 600;
+margin-top: 8px;
+text-align: center;
+}
+</style>
+
+</head>
+<body>
+
+<!-- LOGIN -->
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">QUALI-FLEG</div>
+    <div class="login-sub">Système de Traçabilité — Accès Sécurisé</div>
+    <input type="password" id="pwdInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">Se connecter</button>
+    <div class="login-error" id="loginError">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">QUALI-FLEG</span>
+      <span class="topbar-badge">TRAÇABILITÉ</span>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size:13px;opacity:0.7" id="totalLots"></span>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('lots')">📋 Registre des Lots</div>
+    <div class="tab" onclick="showTab('qualite')">✅ Agréage Qualité</div>
+    <div class="tab" onclick="showTab('production')">⚙️ Suivi Production</div>
+    <div class="tab" onclick="showTab('pf')">🔍 Contrôle Produit Fini</div>
+    <div class="tab" onclick="showTab('expedition')">🚚 Expédition</div>
+    <div class="tab" onclick="showTab('incidents')">⚠️ Incidents</div>
+  </div>
+
+  <div class="content">
+
+```
+<!-- REGISTRE LOTS -->
+<div class="page active" id="page-lots">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="s-total">—</div>
+      <div class="stat-label">Total Lots</div>
+    </div>
+    <div class="stat-card" style="border-color:#FFC107">
+      <div class="stat-num" id="s-encours">—</div>
+      <div class="stat-label">En cours</div>
+    </div>
+    <div class="stat-card" style="border-color:#52B788">
+      <div class="stat-num" id="s-expedie">—</div>
+      <div class="stat-label">Expédiés</div>
+    </div>
+    <div class="stat-card" style="border-color:#DC3545">
+      <div class="stat-num" id="s-refuse">—</div>
+      <div class="stat-label">Refusés</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Registre des Lots</span>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input class="search-bar" placeholder="🔍 Rechercher un lot..." oninput="filterLots(this.value)">
+        <button class="btn btn-primary" onclick="openModal('addLot')">+ Nouveau Lot</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="lotsTable">
+        <thead>
+          <tr>
+            <th>N° LOT</th>
+            <th>N° FICHE</th>
+            <th>FOURNISSEUR</th>
+            <th>PRODUIT</th>
+            <th>VARIÉTÉ</th>
+            <th>ORIGINE</th>
+            <th>DATE RÉCEPTION</th>
+            <th>HEURE</th>
+            <th>QUANTITÉ</th>
+            <th>CONDITIONNEMENT</th>
+            <th>N° BL</th>
+            <th>STATUT</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="lotsBody">
+          <tr><td colspan="13"><div class="loading">Chargement...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- AGRÉAGE QUALITÉ -->
+<div class="page" id="page-qualite">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Agréage Qualité à Réception</span>
+      <button class="btn btn-primary" onclick="openModal('addQualite')">+ Nouveau Contrôle</button>
+    </div>
+    <div class="table-wrap">
+      <table id="qualiteTable">
+        <thead>
+          <tr>
+            <th>N° LOT</th><th>N° FICHE</th><th>DATE CONTRÔLE</th><th>CONTRÔLEUR</th>
+            <th>ASPECT VISUEL</th><th>CALIBRE</th><th>MATURITÉ</th>
+            <th>TAUX CONFORMITÉ</th><th>DÉCISION</th><th>OBSERVATIONS</th><th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="qualiteBody"><tr><td colspan="11"><div class="loading">Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SUIVI PRODUCTION -->
+<div class="page" id="page-production">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Suivi des Opérations Internes</span>
+      <button class="btn btn-primary" onclick="openModal('addProduction')">+ Nouvelle Opération</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>N° LOT</th><th>OPÉRATION</th><th>DATE DÉBUT</th><th>DATE FIN</th>
+            <th>DURÉE (h)</th><th>QTÉ ENTRÉE</th><th>QTÉ SORTIE</th>
+            <th>% PERTE</th><th>RESPONSABLE</th><th>OBSERVATIONS</th><th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="productionBody"><tr><td colspan="11"><div class="loading">Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CONTRÔLE PF -->
+<div class="page" id="page-pf">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Contrôle Produit Fini (Libératoire)</span>
+      <button class="btn btn-primary" onclick="openModal('addPF')">+ Nouveau Contrôle</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>N° LOT</th><th>DATE CONTRÔLE</th><th>CONTRÔLEUR</th>
+            <th>QTÉ CONTRÔLÉE</th><th>QTÉ CONFORME</th><th>% ÉCART</th>
+            <th>RÉSULTAT</th><th>LIBÉRATION</th><th>OBSERVATIONS</th><th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="pfBody"><tr><td colspan="10"><div class="loading">Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- EXPÉDITION -->
+<div class="page" id="page-expedition">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Expédition</span>
+      <button class="btn btn-primary" onclick="openModal('addExpedition')">+ Nouvelle Expédition</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>N° LOT</th><th>DATE EXPÉDITION</th><th>CLIENT</th><th>DESTINATION</th>
+            <th>QTÉ EXPÉDIÉE</th><th>N° BL SORTIE</th><th>TRANSPORTEUR</th>
+            <th>STATUT</th><th>OBSERVATIONS</th><th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="expeditionBody"><tr><td colspan="10"><div class="loading">Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- INCIDENTS -->
+<div class="page" id="page-incidents">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Observations & Incidents</span>
+      <button class="btn btn-primary" onclick="openModal('addIncident')">+ Nouvel Incident</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>N° LOT</th><th>DATE</th><th>TYPE D'INCIDENT</th><th>DESCRIPTION</th>
+            <th>CONCERNÉ</th><th>ACTION CORRECTIVE</th><th>RESPONSABLE</th><th>STATUT</th><th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="incidentsBody"><tr><td colspan="9"><div class="loading">Chargement...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+```
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════ -->
+
+<!-- ADD LOT -->
+
+<div class="modal-overlay" id="modal-addLot">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nouveau Lot</span>
+      <button class="modal-close" onclick="closeModal('addLot')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ABRÉVIATION FOURNISSEUR (3 lettres)</label>
+          <input id="f-abr-frs" maxlength="3" placeholder="ex: AHF" oninput="updateLotPreview()" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label>ABRÉVIATION PRODUIT (3 lettres)</label>
+          <input id="f-abr-prod" maxlength="3" placeholder="ex: TOM" oninput="updateLotPreview()" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label>N° FICHE</label>
+          <input id="f-num-fiche" type="number" placeholder="ex: 001" oninput="updateLotPreview()">
+        </div>
+        <div class="form-group">
+          <label>DATE DE RÉCEPTION</label>
+          <input id="f-date-rec" type="date" oninput="updateLotPreview()">
+        </div>
+      </div>
+      <div class="lot-num-preview" id="lotPreview">N° LOT : — — — —</div>
+      <div class="form-grid" style="margin-top:16px">
+        <div class="form-group">
+          <label>FOURNISSEUR / FERME</label>
+          <input id="f-fournisseur" placeholder="Nom complet">
+        </div>
+        <div class="form-group">
+          <label>PRODUIT</label>
+          <input id="f-produit" placeholder="ex: Tomate">
+        </div>
+        <div class="form-group">
+          <label>VARIÉTÉ</label>
+          <input id="f-variete" placeholder="ex: Cherry">
+        </div>
+        <div class="form-group">
+          <label>ORIGINE</label>
+          <input id="f-origine" placeholder="ex: Agadir">
+        </div>
+        <div class="form-group">
+          <label>HEURE DE RÉCEPTION</label>
+          <input id="f-heure" type="time">
+        </div>
+        <div class="form-group">
+          <label>QUANTITÉ (kg/unités)</label>
+          <input id="f-quantite" type="number" placeholder="ex: 500">
+        </div>
+        <div class="form-group">
+          <label>TYPE DE CONDITIONNEMENT</label>
+          <select id="f-conditionnement">
+            <option value="">— Choisir —</option>
+            <option>Cagette</option><option>Carton</option><option>Filet</option>
+            <option>Vrac</option><option>Palette</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>N° BON DE LIVRAISON (BL)</label>
+          <input id="f-bl" placeholder="ex: BL-2026-0042">
+        </div>
+        <div class="form-group">
+          <label>STATUT</label>
+          <select id="f-statut">
+            <option>En attente</option><option>En cours</option>
+            <option>Expédié</option><option>Bloqué</option><option>Refusé</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>LIEN FICHE (Google Drive)</label>
+          <input id="f-lien" placeholder="https://drive.google.com/...">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal('addLot')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveLot()">Enregistrer le Lot</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOT DETAIL -->
+
+<div class="modal-overlay" id="modal-lotDetail">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <span class="modal-title">Détail du Lot</span>
+      <button class="modal-close" onclick="closeModal('lotDetail')">×</button>
+    </div>
+    <div class="modal-body" id="lotDetailBody"></div>
+  </div>
+</div>
+
+<!-- ADD QUALITE -->
+
+<div class="modal-overlay" id="modal-addQualite">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nouveau Contrôle Qualité</span>
+      <button class="modal-close" onclick="closeModal('addQualite')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>N° LOT</label><input id="q-lot" placeholder="ex: AHF-TOM-110426-001"></div>
+        <div class="form-group"><label>N° FICHE</label><input id="q-fiche" placeholder="ex: 001"></div>
+        <div class="form-group"><label>DATE CONTRÔLE</label><input id="q-date" type="date"></div>
+        <div class="form-group"><label>CONTRÔLEUR</label><input id="q-controleur" placeholder="Nom"></div>
+        <div class="form-group"><label>ASPECT VISUEL</label>
+          <select id="q-aspect"><option value="">—</option><option>Conforme</option><option>Non conforme</option><option>À vérifier</option></select></div>
+        <div class="form-group"><label>CALIBRE</label>
+          <select id="q-calibre"><option value="">—</option><option>Conforme</option><option>Non conforme</option><option>À vérifier</option></select></div>
+        <div class="form-group"><label>MATURITÉ</label>
+          <select id="q-maturite"><option value="">—</option><option>Conforme</option><option>Trop mûr</option><option>Pas assez mûr</option></select></div>
+        <div class="form-group"><label>TAUX CONFORMITÉ (%)</label><input id="q-taux" type="number" min="0" max="100" placeholder="ex: 95"></div>
+        <div class="form-group"><label>DÉCISION</label>
+          <select id="q-decision"><option value="">—</option><option>Accepté</option><option>Accepté sous réserve</option><option>Refusé</option></select></div>
+        <div class="form-group full"><label>OBSERVATIONS</label><textarea id="q-obs" placeholder="Remarques..."></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal('addQualite')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveQualite()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PRODUCTION -->
+
+<div class="modal-overlay" id="modal-addProduction">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nouvelle Opération de Production</span>
+      <button class="modal-close" onclick="closeModal('addProduction')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>N° LOT</label><input id="p-lot" placeholder="ex: AHF-TOM-110426-001"></div>
+        <div class="form-group"><label>OPÉRATION</label>
+          <select id="p-operation"><option value="">—</option><option>Triage</option><option>Reconditionnement</option><option>Stockage</option><option>Lavage</option><option>Calibrage</option><option>Emballage</option></select></div>
+        <div class="form-group"><label>DATE DÉBUT</label><input id="p-debut" type="datetime-local"></div>
+        <div class="form-group"><label>DATE FIN</label><input id="p-fin" type="datetime-local"></div>
+        <div class="form-group"><label>QTÉ ENTRÉE (kg/u)</label><input id="p-qte-in" type="number" placeholder="ex: 500"></div>
+        <div class="form-group"><label>QTÉ SORTIE (kg/u)</label><input id="p-qte-out" type="number" placeholder="ex: 480"></div>
+        <div class="form-group"><label>RESPONSABLE</label><input id="p-resp" placeholder="Nom"></div>
+        <div class="form-group full"><label>OBSERVATIONS</label><textarea id="p-obs" placeholder="Remarques..."></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal('addProduction')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveProduction()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PF -->
+
+<div class="modal-overlay" id="modal-addPF">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Contrôle Produit Fini</span>
+      <button class="modal-close" onclick="closeModal('addPF')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>N° LOT</label><input id="pf-lot" placeholder="ex: AHF-TOM-110426-001"></div>
+        <div class="form-group"><label>DATE CONTRÔLE</label><input id="pf-date" type="date"></div>
+        <div class="form-group"><label>CONTRÔLEUR</label><input id="pf-controleur" placeholder="Nom"></div>
+        <div class="form-group"><label>QTÉ CONTRÔLÉE (kg/u)</label><input id="pf-qte-ctrl" type="number"></div>
+        <div class="form-group"><label>QTÉ CONFORME (kg/u)</label><input id="pf-qte-conf" type="number"></div>
+        <div class="form-group"><label>RÉSULTAT</label>
+          <select id="pf-resultat"><option value="">—</option><option>Conforme</option><option>Non conforme</option></select></div>
+        <div class="form-group"><label>LIBÉRATION</label>
+          <select id="pf-liberation"><option value="">—</option><option>Libéré</option><option>Bloqué</option><option>En attente</option></select></div>
+        <div class="form-group full"><label>OBSERVATIONS</label><textarea id="pf-obs" placeholder="Remarques..."></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal('addPF')">Annuler</button>
+        <button class="btn btn-primary" onclick="savePF()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD EXPEDITION -->
+
+<div class="modal-overlay" id="modal-addExpedition">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nouvelle Expédition</span>
+      <button class="modal-close" onclick="closeModal('addExpedition')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>N° LOT</label><input id="e-lot" placeholder="ex: AHF-TOM-110426-001"></div>
+        <div class="form-group"><label>DATE EXPÉDITION</label><input id="e-date" type="date"></div>
+        <div class="form-group"><label>CLIENT</label><input id="e-client" placeholder="Nom du client"></div>
+        <div class="form-group"><label>DESTINATION</label><input id="e-dest" placeholder="Ville / Région"></div>
+        <div class="form-group"><label>QTÉ EXPÉDIÉE (kg/u)</label><input id="e-qte" type="number"></div>
+        <div class="form-group"><label>N° BL SORTIE</label><input id="e-bl" placeholder="ex: BLS-2026-001"></div>
+        <div class="form-group"><label>TRANSPORTEUR</label><input id="e-transport" placeholder="Nom transporteur"></div>
+        <div class="form-group"><label>STATUT LIVRAISON</label>
+          <select id="e-statut"><option value="">—</option><option>Livré</option><option>En transit</option><option>En attente</option><option>Annulé</option><option>Retour</option></select></div>
+        <div class="form-group full"><label>OBSERVATIONS</label><textarea id="e-obs" placeholder="Remarques..."></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal('addExpedition')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveExpedition()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD INCIDENT -->
+
+<div class="modal-overlay" id="modal-addIncident">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nouvel Incident</span>
+      <button class="modal-close" onclick="closeModal('addIncident')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>N° LOT</label><input id="i-lot" placeholder="ex: AHF-TOM-110426-001"></div>
+        <div class="form-group"><label>DATE</label><input id="i-date" type="date"></div>
+        <div class="form-group"><label>TYPE D'INCIDENT</label>
+          <select id="i-type"><option value="">—</option><option>Retour client</option><option>Refus réception</option><option>Réclamation</option><option>Commande annulée</option><option>Non-conformité</option><option>Autre</option></select></div>
+        <div class="form-group"><label>RESPONSABLE</label><input id="i-resp" placeholder="Nom"></div>
+        <div class="form-group"><label>CONCERNÉ (client/fournisseur)</label><input id="i-concerne" placeholder="Nom"></div>
+        <div class="form-group"><label>STATUT</label>
+          <select id="i-statut"><option value="">—</option><option>Ouvert</option><option>En cours</option><option>Clôturé</option></select></div>
+        <div class="form-group full"><label>DESCRIPTION</label><textarea id="i-desc" placeholder="Décrivez l'incident..."></textarea></div>
+        <div class="form-group full"><label>ACTION CORRECTIVE</label><textarea id="i-action" placeholder="Actions prises..."></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeModal('addIncident')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveIncident()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://pyvzsxsijpteeohotfcb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_09gS-G2Msq6i_6azzn9oGw_PG8L2A53';
+const PASSWORD = 'Quali-Fleg2026';
+
+// ── AUTH ──
+function login() {
+  const pwd = document.getElementById('pwdInput').value;
+  if (pwd === PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initDB().then(() => { loadAll(); });
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+function logout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+}
+
+// ── SUPABASE API ──
+async function dbReq(method, table, body = null, filter = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+    },
+    body: body ? JSON.stringify(body) : null
+  });
+  if (method === 'GET') return res.json();
+  return res;
+}
+
+async function initDB() {
+  // Create tables via SQL edge function not available in REST — use existing tables or create via dashboard
+  // We'll just attempt selects and handle gracefully
+}
+
+// ── TABS ──
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['lots','qualite','production','pf','expedition','incidents'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  if (name === 'lots') loadLots();
+  if (name === 'qualite') loadQualite();
+  if (name === 'production') loadProduction();
+  if (name === 'pf') loadPF();
+  if (name === 'expedition') loadExpedition();
+  if (name === 'incidents') loadIncidents();
+}
+
+// ── MODALS ──
+function openModal(name) {
+  document.getElementById(`modal-${name}`).classList.add('open');
+  if (name === 'addLot') {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-date-rec').value = today;
+    updateLotPreview();
+  }
+}
+function closeModal(name) {
+  document.getElementById(`modal-${name}`).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ── LOT PREVIEW ──
+function updateLotPreview() {
+  const abrf = (document.getElementById('f-abr-frs').value || '???').toUpperCase().padEnd(3,'?').slice(0,3);
+  const abrp = (document.getElementById('f-abr-prod').value || '???').toUpperCase().padEnd(3,'?').slice(0,3);
+  const date = document.getElementById('f-date-rec').value;
+  const fiche = document.getElementById('f-num-fiche').value;
+  let dateStr = '??????';
+  if (date) {
+    const d = new Date(date);
+    dateStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}).replace(/\//g,'');
+  }
+  const ficheStr = fiche ? String(fiche).padStart(3,'0') : '???';
+  document.getElementById('lotPreview').textContent = `N° LOT : ${abrf}-${abrp}-${dateStr}-${ficheStr}`;
+}
+
+// ── BADGE ──
+function statusBadge(s) {
+  const map = {
+    'En cours': 'badge-yellow', 'En attente': 'badge-gray',
+    'Expédié': 'badge-green', 'Livré': 'badge-green',
+    'Bloqué': 'badge-red', 'Refusé': 'badge-red',
+    'Accepté': 'badge-green', 'Non conforme': 'badge-red',
+    'Conforme': 'badge-green', 'Libéré': 'badge-green',
+    'Ouvert': 'badge-red', 'Clôturé': 'badge-green', 'En transit': 'badge-yellow'
+  };
+  const cls = map[s] || 'badge-gray';
+  return `<span class="badge ${cls}">${s || '—'}</span>`;
+}
+
+// ══════════════════════════════════════
+// LOTS
+// ══════════════════════════════════════
+let allLots = [];
+
+async function loadLots() {
+  try {
+    const data = await dbReq('GET', 'lots', null, '?order=created_at.desc');
+    allLots = Array.isArray(data) ? data : [];
+    renderLots(allLots);
+    updateStats(allLots);
+  } catch(e) {
+    document.getElementById('lotsBody').innerHTML = `<tr><td colspan="13"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Créez d'abord la table "lots" dans Supabase (voir instructions)</div></div></td></tr>`;
+  }
+}
+
+function renderLots(lots) {
+  const tbody = document.getElementById('lotsBody');
+  if (!lots.length) {
+    tbody.innerHTML = `<tr><td colspan="13"><div class="empty"><div class="empty-icon">📦</div><div class="empty-text">Aucun lot enregistré. Cliquez sur + Nouveau Lot</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lots.map(l => `
+    <tr>
+      <td><span class="lot-num" onclick="showLotDetail(${l.id})">${l.num_lot || '—'}</span></td>
+      <td>${l.num_fiche || '—'}</td>
+      <td>${l.fournisseur || '—'}</td>
+      <td>${l.produit || '—'}</td>
+      <td>${l.variete || '—'}</td>
+      <td>${l.origine || '—'}</td>
+      <td>${l.date_reception || '—'}</td>
+      <td>${l.heure_reception || '—'}</td>
+      <td>${l.quantite ? l.quantite + ' kg/u' : '—'}</td>
+      <td>${l.conditionnement || '—'}</td>
+      <td>${l.num_bl || '—'}</td>
+      <td>${statusBadge(l.statut)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${l.lien_fiche ? `<a href="${l.lien_fiche}" target="_blank" class="btn btn-sm btn-primary">📄 Fiche</a>` : '<span style="font-size:11px;color:#aaa">Pas de fiche</span>'}
+          <button class="btn btn-sm btn-danger" onclick="deleteLot(${l.id})">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterLots(q) {
+  const filtered = allLots.filter(l =>
+    (l.num_lot||'').toLowerCase().includes(q.toLowerCase()) ||
+    (l.fournisseur||'').toLowerCase().includes(q.toLowerCase()) ||
+    (l.produit||'').toLowerCase().includes(q.toLowerCase())
+  );
+  renderLots(filtered);
+}
+
+function updateStats(lots) {
+  document.getElementById('s-total').textContent = lots.length;
+  document.getElementById('s-encours').textContent = lots.filter(l => l.statut === 'En cours').length;
+  document.getElementById('s-expedie').textContent = lots.filter(l => l.statut === 'Expédié').length;
+  document.getElementById('s-refuse').textContent = lots.filter(l => l.statut === 'Refusé').length;
+  document.getElementById('totalLots').textContent = `${lots.length} lots`;
+}
+
+async function saveLot() {
+  const abrf = document.getElementById('f-abr-frs').value.toUpperCase();
+  const abrp = document.getElementById('f-abr-prod').value.toUpperCase();
+  const date = document.getElementById('f-date-rec').value;
+  const fiche = document.getElementById('f-num-fiche').value;
+  if (!abrf || !abrp || !date || !fiche) { alert('Remplissez les champs du N° de lot'); return; }
+  const d = new Date(date);
+  const dateStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}).replace(/\//g,'');
+  const num_lot = `${abrf}-${abrp}-${dateStr}-${String(fiche).padStart(3,'0')}`;
+
+  const row = {
+    num_lot,
+    num_fiche: fiche,
+    fournisseur: document.getElementById('f-fournisseur').value,
+    produit: document.getElementById('f-produit').value,
+    variete: document.getElementById('f-variete').value,
+    origine: document.getElementById('f-origine').value,
+    date_reception: date,
+    heure_reception: document.getElementById('f-heure').value,
+    quantite: document.getElementById('f-quantite').value,
+    conditionnement: document.getElementById('f-conditionnement').value,
+    num_bl: document.getElementById('f-bl').value,
+    statut: document.getElementById('f-statut').value,
+    lien_fiche: document.getElementById('f-lien').value,
+  };
+  await dbReq('POST', 'lots', row);
+  closeModal('addLot');
+  loadLots();
+}
+
+async function deleteLot(id) {
+  if (!confirm('Supprimer ce lot ?')) return;
+  await dbReq('DELETE', 'lots', null, `?id=eq.${id}`);
+  loadLots();
+}
+
+function showLotDetail(id) {
+  const lot = allLots.find(l => l.id === id);
+  if (!lot) return;
+  const body = document.getElementById('lotDetailBody');
+  body.innerHTML = `
+    <div class="lot-detail-header">
+      <div>
+        <div class="lot-detail-num">${lot.num_lot}</div>
+        <div class="lot-detail-product">${lot.produit || ''} ${lot.variete ? '— ' + lot.variete : ''}</div>
+      </div>
+      <div id="qrContainer"></div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-item-label">FOURNISSEUR</div><div class="detail-item-value">${lot.fournisseur || '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">ORIGINE</div><div class="detail-item-value">${lot.origine || '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">DATE RÉCEPTION</div><div class="detail-item-value">${lot.date_reception || '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">HEURE</div><div class="detail-item-value">${lot.heure_reception || '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">QUANTITÉ</div><div class="detail-item-value">${lot.quantite ? lot.quantite + ' kg/u' : '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">CONDITIONNEMENT</div><div class="detail-item-value">${lot.conditionnement || '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">N° BL</div><div class="detail-item-value">${lot.num_bl || '—'}</div></div>
+      <div class="detail-item"><div class="detail-item-label">STATUT</div><div class="detail-item-value">${statusBadge(lot.statut)}</div></div>
+    </div>
+    ${lot.lien_fiche ? `<div style="text-align:center;margin-top:8px"><a href="${lot.lien_fiche}" target="_blank" class="btn btn-primary">📄 Voir la Fiche de Réception</a></div>` : '<div class="fiche-link-box">📎 Aucune fiche attachée à ce lot</div>'}
+  `;
+  // Generate QR
+  setTimeout(() => {
+    try {
+      new QRCode(document.getElementById('qrContainer'), {
+        text: lot.num_lot,
+        width: 100, height: 100,
+        colorDark: '#1A4731', colorLight: '#ffffff'
+      });
+    } catch(e) {}
+  }, 100);
+  openModal('lotDetail');
+}
+
+// ══════════════════════════════════════
+// QUALITÉ
+// ══════════════════════════════════════
+async function loadQualite() {
+  try {
+    const data = await dbReq('GET', 'agreable_qualite', null, '?order=created_at.desc');
+    const tbody = document.getElementById('qualiteBody');
+    const rows = Array.isArray(data) ? data : [];
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Aucun contrôle qualité enregistré</div></div></td></tr>`; return; }
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td><span class="lot-num">${r.num_lot||'—'}</span></td>
+      <td>${r.num_fiche||'—'}</td><td>${r.date_controle||'—'}</td><td>${r.controleur||'—'}</td>
+      <td>${statusBadge(r.aspect_visuel)}</td><td>${statusBadge(r.calibre)}</td><td>${r.maturite||'—'}</td>
+      <td>${r.taux_conformite ? r.taux_conformite + '%' : '—'}</td>
+      <td>${statusBadge(r.decision)}</td><td>${r.observations||'—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteRow('agreable_qualite',${r.id},loadQualite)">🗑</button></td>
+    </tr>`).join('');
+  } catch(e) { document.getElementById('qualiteBody').innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Table non trouvée dans Supabase</div></div></td></tr>`; }
+}
+
+async function saveQualite() {
+  const row = { num_lot: document.getElementById('q-lot').value, num_fiche: document.getElementById('q-fiche').value, date_controle: document.getElementById('q-date').value, controleur: document.getElementById('q-controleur').value, aspect_visuel: document.getElementById('q-aspect').value, calibre: document.getElementById('q-calibre').value, maturite: document.getElementById('q-maturite').value, taux_conformite: document.getElementById('q-taux').value, decision: document.getElementById('q-decision').value, observations: document.getElementById('q-obs').value };
+  await dbReq('POST', 'agreable_qualite', row);
+  closeModal('addQualite'); loadQualite();
+}
+
+// ══════════════════════════════════════
+// PRODUCTION
+// ══════════════════════════════════════
+async function loadProduction() {
+  try {
+    const data = await dbReq('GET', 'suivi_production', null, '?order=created_at.desc');
+    const rows = Array.isArray(data) ? data : [];
+    const tbody = document.getElementById('productionBody');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">⚙️</div><div class="empty-text">Aucune opération enregistrée</div></div></td></tr>`; return; }
+    tbody.innerHTML = rows.map(r => {
+      let duree = '—';
+      if (r.date_debut && r.date_fin) { duree = ((new Date(r.date_fin) - new Date(r.date_debut)) / 3600000).toFixed(1) + 'h'; }
+      let perte = '—';
+      if (r.qte_entree && r.qte_sortie) { perte = (((r.qte_entree - r.qte_sortie) / r.qte_entree) * 100).toFixed(1) + '%'; }
+      return `<tr>
+        <td><span class="lot-num">${r.num_lot||'—'}</span></td>
+        <td>${r.operation||'—'}</td><td>${r.date_debut||'—'}</td><td>${r.date_fin||'—'}</td>
+        <td><span class="badge badge-yellow">${duree}</span></td>
+        <td>${r.qte_entree||'—'}</td><td>${r.qte_sortie||'—'}</td>
+        <td><span class="badge badge-red">${perte}</span></td>
+        <td>${r.responsable||'—'}</td><td>${r.observations||'—'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteRow('suivi_production',${r.id},loadProduction)">🗑</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { document.getElementById('productionBody').innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Table non trouvée</div></div></td></tr>`; }
+}
+
+async function saveProduction() {
+  const row = { num_lot: document.getElementById('p-lot').value, operation: document.getElementById('p-operation').value, date_debut: document.getElementById('p-debut').value, date_fin: document.getElementById('p-fin').value, qte_entree: document.getElementById('p-qte-in').value, qte_sortie: document.getElementById('p-qte-out').value, responsable: document.getElementById('p-resp').value, observations: document.getElementById('p-obs').value };
+  await dbReq('POST', 'suivi_production', row);
+  closeModal('addProduction'); loadProduction();
+}
+
+// ══════════════════════════════════════
+// PRODUIT FINI
+// ══════════════════════════════════════
+async function loadPF() {
+  try {
+    const data = await dbReq('GET', 'controle_pf', null, '?order=created_at.desc');
+    const rows = Array.isArray(data) ? data : [];
+    const tbody = document.getElementById('pfBody');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="10"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Aucun contrôle PF enregistré</div></div></td></tr>`; return; }
+    tbody.innerHTML = rows.map(r => {
+      let ecart = '—';
+      if (r.qte_controlee && r.qte_conforme) { ecart = (((r.qte_controlee - r.qte_conforme) / r.qte_controlee) * 100).toFixed(1) + '%'; }
+      return `<tr>
+        <td><span class="lot-num">${r.num_lot||'—'}</span></td>
+        <td>${r.date_controle||'—'}</td><td>${r.controleur||'—'}</td>
+        <td>${r.qte_controlee||'—'}</td><td>${r.qte_conforme||'—'}</td>
+        <td><span class="badge badge-red">${ecart}</span></td>
+        <td>${statusBadge(r.resultat)}</td><td>${statusBadge(r.liberation)}</td>
+        <td>${r.observations||'—'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteRow('controle_pf',${r.id},loadPF)">🗑</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { document.getElementById('pfBody').innerHTML = `<tr><td colspan="10"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Table non trouvée</div></div></td></tr>`; }
+}
+
+async function savePF() {
+  const row = { num_lot: document.getElementById('pf-lot').value, date_controle: document.getElementById('pf-date').value, controleur: document.getElementById('pf-controleur').value, qte_controlee: document.getElementById('pf-qte-ctrl').value, qte_conforme: document.getElementById('pf-qte-conf').value, resultat: document.getElementById('pf-resultat').value, liberation: document.getElementById('pf-liberation').value, observations: document.getElementById('pf-obs').value };
+  await dbReq('POST', 'controle_pf', row);
+  closeModal('addPF'); loadPF();
+}
+
+// ══════════════════════════════════════
+// EXPÉDITION
+// ══════════════════════════════════════
+async function loadExpedition() {
+  try {
+    const data = await dbReq('GET', 'expedition', null, '?order=created_at.desc');
+    const rows = Array.isArray(data) ? data : [];
+    const tbody = document.getElementById('expeditionBody');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="10"><div class="empty"><div class="empty-icon">🚚</div><div class="empty-text">Aucune expédition enregistrée</div></div></td></tr>`; return; }
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td><span class="lot-num">${r.num_lot||'—'}</span></td>
+      <td>${r.date_expedition||'—'}</td><td>${r.client||'—'}</td><td>${r.destination||'—'}</td>
+      <td>${r.qte_expediee||'—'}</td><td>${r.num_bl_sortie||'—'}</td><td>${r.transporteur||'—'}</td>
+      <td>${statusBadge(r.statut)}</td><td>${r.observations||'—'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteRow('expedition',${r.id},loadExpedition)">🗑</button></td>
+    </tr>`).join('');
+  } catch(e) { document.getElementById('expeditionBody').innerHTML = `<tr><td colspan="10"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Table non trouvée</div></div></td></tr>`; }
+}
+
+async function saveExpedition() {
+  const row = { num_lot: document.getElementById('e-lot').value, date_expedition: document.getElementById('e-date').value, client: document.getElementById('e-client').value, destination: document.getElementById('e-dest').value, qte_expediee: document.getElementById('e-qte').value, num_bl_sortie: document.getElementById('e-bl').value, transporteur: document.getElementById('e-transport').value, statut: document.getElementById('e-statut').value, observations: document.getElementById('e-obs').value };
+  await dbReq('POST', 'expedition', row);
+  closeModal('addExpedition'); loadExpedition();
+}
+
+// ══════════════════════════════════════
+// INCIDENTS
+// ══════════════════════════════════════
+async function loadIncidents() {
+  try {
+    const data = await dbReq('GET', 'incidents', null, '?order=created_at.desc');
+    const rows = Array.isArray(data) ? data : [];
+    const tbody = document.getElementById('incidentsBody');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Aucun incident enregistré</div></div></td></tr>`; return; }
+    tbody.innerHTML = rows.map(r => `<tr>
+      <td><span class="lot-num">${r.num_lot||'—'}</span></td>
+      <td>${r.date_incident||'—'}</td><td>${r.type_incident||'—'}</td>
+      <td>${r.description||'—'}</td><td>${r.concerne||'—'}</td>
+      <td>${r.action_corrective||'—'}</td><td>${r.responsable||'—'}</td>
+      <td>${statusBadge(r.statut)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteRow('incidents',${r.id},loadIncidents)">🗑</button></td>
+    </tr>`).join('');
+  } catch(e) { document.getElementById('incidentsBody').innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Table non trouvée</div></div></td></tr>`; }
+}
+
+async function saveIncident() {
+  const row = { num_lot: document.getElementById('i-lot').value, date_incident: document.getElementById('i-date').value, type_incident: document.getElementById('i-type').value, description: document.getElementById('i-desc').value, concerne: document.getElementById('i-concerne').value, action_corrective: document.getElementById('i-action').value, responsable: document.getElementById('i-resp').value, statut: document.getElementById('i-statut').value };
+  await dbReq('POST', 'incidents', row);
+  closeModal('addIncident'); loadIncidents();
+}
+
+// ── DELETE ──
+async function deleteRow(table, id, reloadFn) {
+  if (!confirm('Supprimer cet enregistrement ?')) return;
+  await dbReq('DELETE', table, null, `?id=eq.${id}`);
+  reloadFn();
+}
+
+// ── INIT ──
+function loadAll() { loadLots(); }
+</script>
+
+</body>
+</html>
