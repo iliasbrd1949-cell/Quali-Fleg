@@ -4,529 +4,482 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QUALI-FLEG — Traçabilité</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root {
-  --g1: #0D2B1A;
-  --g2: #1A4731;
-  --g3: #2D6A4F;
-  --g4: #52B788;
-  --g5: #95D5B2;
-  --g6: #D8F3DC;
-  --g7: #F0FAF2;
-  --white: #FFFFFF;
-  --gray-50: #F9FAFB;
-  --gray-100: #F3F4F6;
-  --gray-200: #E5E7EB;
-  --gray-300: #D1D5DB;
-  --gray-400: #9CA3AF;
-  --gray-600: #4B5563;
-  --gray-700: #374151;
-  --gray-900: #111827;
-  --red: #EF4444;
-  --red-light: #FEE2E2;
-  --yellow: #F59E0B;
-  --yellow-light: #FEF3C7;
-  --blue-light: #EFF6FF;
-  --radius-sm: 6px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow: 0 4px 16px rgba(13,43,26,0.10);
-  --shadow-lg: 0 12px 40px rgba(13,43,26,0.18);
-  --font: 'Outfit', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
+  --g1:#0A1F11; --g2:#1A4731; --g3:#2D6A4F; --g4:#52B788;
+  --g5:#95D5B2; --g6:#D8F3DC; --g7:#F0FAF2;
+  --white:#FFFFFF; --black:#0A0A0A;
+  --s50:#F8FAFC; --s100:#F1F5F9; --s200:#E2E8F0;
+  --s300:#CBD5E1; --s400:#94A3B8; --s500:#64748B;
+  --s600:#475569; --s700:#334155; --s800:#1E293B; --s900:#0F172A;
+  --red:#EF4444; --red-l:#FEE2E2;
+  --amber:#F59E0B; --amber-l:#FEF3C7;
+  --blue:#3B82F6; --blue-l:#EFF6FF;
+  --r4:4px; --r8:8px; --r12:12px; --r16:16px; --r20:20px; --r24:24px;
+  --sh-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh:0 4px 16px rgba(10,31,17,.08),0 2px 4px rgba(10,31,17,.04);
+  --sh-lg:0 20px 60px rgba(10,31,17,.15),0 8px 20px rgba(10,31,17,.08);
+  --sh-xl:0 32px 80px rgba(10,31,17,.20);
+  --font:'Outfit',sans-serif; --mono:'JetBrains Mono',monospace;
+  --transition:all .2s cubic-bezier(.4,0,.2,1);
 }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--s50);color:var(--s900);min-height:100vh;line-height:1.5}
+button{cursor:pointer;font-family:var(--font)}
+a{text-decoration:none}
+input,select,textarea{font-family:var(--font)}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { font-family: var(--font); background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
-
-/* ═══════════════════════════════
+/* ══════════════════════════════════════════
    LOGIN
-═══════════════════════════════ */
-#loginScreen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(145deg, var(--g1) 0%, var(--g2) 50%, var(--g3) 100%);
-  position: relative;
-  overflow: hidden;
+══════════════════════════════════════════ */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--g1);position:relative;overflow:hidden;
 }
-#loginScreen::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 30% 70%, rgba(82,183,136,0.15) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(149,213,178,0.10) 0%, transparent 50%);
+#loginScreen::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 80%,rgba(82,183,136,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 10%,rgba(45,106,79,.25) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(26,71,49,.3) 0%,transparent 70%);
 }
-.login-card {
-  position: relative;
-  background: rgba(255,255,255,0.97);
-  border-radius: 24px;
-  padding: 52px 44px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.1);
-  backdrop-filter: blur(20px);
+#loginScreen::after{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(82,183,136,.06) 1px,transparent 1px);
+  background-size:40px 40px;
 }
-.login-brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 36px;
-  justify-content: center;
+.login-wrap{
+  position:relative;z-index:1;width:100%;max-width:440px;padding:20px;
 }
-.login-icon {
-  width: 52px; height: 52px;
-  background: linear-gradient(135deg, var(--g2), var(--g4));
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
+.login-card{
+  background:rgba(255,255,255,.97);border-radius:28px;padding:52px 44px;
+  box-shadow:var(--sh-xl);border:1px solid rgba(255,255,255,.2);
 }
-.login-name { font-size: 26px; font-weight: 800; color: var(--g2); letter-spacing: -0.5px; }
-.login-tagline { font-size: 13px; color: var(--gray-400); text-align: center; margin-bottom: 32px; font-weight: 400; }
-.login-label { font-size: 12px; font-weight: 600; color: var(--gray-600); letter-spacing: 0.4px; margin-bottom: 8px; display: block; }
-.login-input {
-  width: 100%;
-  padding: 13px 16px;
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius);
-  font-family: var(--mono);
-  font-size: 15px;
-  color: var(--gray-900);
-  outline: none;
-  transition: all 0.2s;
-  background: var(--gray-50);
-  letter-spacing: 2px;
+.login-top{text-align:center;margin-bottom:40px}
+.login-emblem{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,var(--g2),var(--g4));
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;margin:0 auto 20px;
+  box-shadow:0 8px 24px rgba(26,71,49,.35);
 }
-.login-input:focus { border-color: var(--g4); background: white; box-shadow: 0 0 0 4px rgba(82,183,136,0.12); }
-.login-btn {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--g2), var(--g3));
-  color: white;
-  border: none;
-  border-radius: var(--radius);
-  font-family: var(--font);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 16px;
-  transition: all 0.2s;
-  letter-spacing: 0.3px;
+.login-brand{font-size:28px;font-weight:900;color:var(--g2);letter-spacing:-1px;line-height:1}
+.login-sub{font-size:13px;color:var(--s400);margin-top:6px;font-weight:400}
+.login-field{margin-bottom:16px}
+.login-lbl{display:block;font-size:11px;font-weight:700;color:var(--s500);letter-spacing:.8px;margin-bottom:8px;text-transform:uppercase}
+.login-inp{
+  width:100%;padding:14px 18px;border:2px solid var(--s200);border-radius:var(--r12);
+  font-family:var(--mono);font-size:15px;color:var(--s900);
+  background:var(--s50);outline:none;transition:var(--transition);letter-spacing:2px;
 }
-.login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(26,71,49,0.35); }
-.login-btn:active { transform: translateY(0); }
-.login-error { color: var(--red); font-size: 13px; margin-top: 10px; text-align: center; display: none; font-weight: 500; }
+.login-inp:focus{border-color:var(--g4);background:white;box-shadow:0 0 0 4px rgba(82,183,136,.12)}
+.login-btn{
+  width:100%;padding:16px;margin-top:8px;
+  background:linear-gradient(135deg,var(--g2) 0%,var(--g3) 100%);
+  color:white;border:none;border-radius:var(--r12);
+  font-size:15px;font-weight:700;letter-spacing:.3px;
+  transition:var(--transition);position:relative;overflow:hidden;
+}
+.login-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--g3),var(--g4));
+  opacity:0;transition:var(--transition);
+}
+.login-btn:hover::before{opacity:1}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(26,71,49,.4)}
+.login-btn:active{transform:translateY(0)}
+.login-btn span{position:relative;z-index:1}
+.login-err{color:var(--red);font-size:13px;text-align:center;margin-top:12px;font-weight:500;display:none}
+.login-footer{text-align:center;margin-top:28px;font-size:12px;color:var(--s400)}
 
-/* ═══════════════════════════════
-   APP
-═══════════════════════════════ */
-#app { display: none; min-height: 100vh; }
+/* ══════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════ */
+#app{display:none;min-height:100vh}
 
-/* TOPBAR */
-.topbar {
-  background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 100%);
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+/* HEADER */
+.header{
+  background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 100%);
+  height:68px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 24px rgba(0,0,0,.25);
 }
-.topbar-left { display: flex; align-items: center; gap: 16px; }
-.topbar-logo { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.3px; }
-.topbar-badge {
-  background: rgba(82,183,136,0.25);
-  border: 1px solid rgba(82,183,136,0.4);
-  color: var(--g5);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
-  letter-spacing: 1px;
+.header-left{display:flex;align-items:center;gap:20px}
+.header-logo{display:flex;align-items:center;gap:12px}
+.header-icon{
+  width:38px;height:38px;background:rgba(255,255,255,.12);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  border:1px solid rgba(255,255,255,.15);
 }
-.topbar-right { display: flex; align-items: center; gap: 12px; }
-.topbar-count { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 400; }
-.btn-logout {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.85);
-  padding: 7px 16px;
-  border-radius: 8px;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+.header-name{font-size:19px;font-weight:900;color:white;letter-spacing:-.5px}
+.header-divider{width:1px;height:28px;background:rgba(255,255,255,.15)}
+.header-domaines{
+  height:36px;background:white;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 10px;font-size:11px;font-weight:800;color:#C0392B;
+  letter-spacing:.5px;border:2px solid #7CB833;
 }
-.btn-logout:hover { background: rgba(255,255,255,0.18); }
+.header-badge{
+  background:rgba(82,183,136,.2);border:1px solid rgba(82,183,136,.35);
+  color:var(--g5);font-size:10px;font-weight:700;
+  padding:4px 12px;border-radius:20px;letter-spacing:1px;
+}
+.header-right{display:flex;align-items:center;gap:14px}
+.header-stat{
+  display:flex;flex-direction:column;align-items:flex-end;
+}
+.header-stat-num{font-size:18px;font-weight:800;color:white;line-height:1}
+.header-stat-lbl{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.5px}
+.btn-logout{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.8);padding:8px 16px;border-radius:var(--r8);
+  font-size:13px;font-weight:500;transition:var(--transition);
+}
+.btn-logout:hover{background:rgba(255,255,255,.2)}
 
-/* TABS */
-.tabs-wrap {
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
-  overflow-x: auto;
-  scrollbar-width: none;
+/* NAV TABS */
+.nav{
+  background:white;border-bottom:1px solid var(--s200);
+  overflow-x:auto;scrollbar-width:none;
 }
-.tabs-wrap::-webkit-scrollbar { display: none; }
-.tabs {
-  display: flex;
-  padding: 0 28px;
-  gap: 2px;
-  min-width: max-content;
+.nav::-webkit-scrollbar{display:none}
+.nav-inner{display:flex;padding:0 32px;min-width:max-content}
+.nav-tab{
+  display:flex;align-items:center;gap:8px;
+  padding:16px 20px;font-size:13px;font-weight:500;color:var(--s400);
+  border-bottom:2.5px solid transparent;margin-bottom:-1px;
+  cursor:pointer;white-space:nowrap;transition:var(--transition);
+  background:none;border-top:none;border-left:none;border-right:none;
 }
-.tab {
-  padding: 16px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-400);
-  cursor: pointer;
-  border-bottom: 2.5px solid transparent;
-  margin-bottom: -1px;
-  white-space: nowrap;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.nav-tab:hover{color:var(--g3)}
+.nav-tab.active{color:var(--g2);border-bottom-color:var(--g3);font-weight:700}
+.nav-tab-icon{font-size:15px}
+.nav-tab-count{
+  background:var(--g6);color:var(--g2);font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:20px;
 }
-.tab:hover { color: var(--g3); }
-.tab.active { color: var(--g2); border-color: var(--g3); font-weight: 600; }
-.tab-icon { font-size: 14px; }
 
 /* CONTENT */
-.content { padding: 28px; max-width: 1500px; margin: 0 auto; }
-.page { display: none; animation: fadeIn 0.2s ease; }
-.page.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.content{padding:28px 32px;max-width:1600px;margin:0 auto}
+.view{display:none;animation:fadeUp .22s ease}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* STATS */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-}
-.stat-card {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: 22px 20px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--gray-100);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--g3), var(--g4));
-}
-.stat-card.yellow::before { background: linear-gradient(90deg, var(--yellow), #FCD34D); }
-.stat-card.red::before { background: linear-gradient(90deg, var(--red), #F87171); }
-.stat-card.blue::before { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
-.stat-num { font-size: 32px; font-weight: 800; color: var(--g2); line-height: 1; margin-bottom: 6px; }
-.stat-card.yellow .stat-num { color: var(--yellow); }
-.stat-card.red .stat-num { color: var(--red); }
-.stat-card.blue .stat-num { color: #3B82F6; }
-.stat-label { font-size: 12px; color: var(--gray-400); font-weight: 500; letter-spacing: 0.3px; }
+/* ══════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════ */
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px}
+@media(max-width:900px){.dash-stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.dash-stats{grid-template-columns:1fr 1fr}}
 
-/* CARD */
-.card {
-  background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--gray-100);
-  overflow: hidden;
+.stat-card{
+  background:white;border-radius:var(--r16);padding:24px;
+  box-shadow:var(--sh-sm);border:1px solid var(--s100);
+  position:relative;overflow:hidden;transition:var(--transition);
+  cursor:default;
 }
-.card-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--gray-100);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--sh)}
+.stat-card-bar{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--r16) var(--r16) 0 0}
+.stat-card-bar.green{background:linear-gradient(90deg,var(--g3),var(--g4))}
+.stat-card-bar.amber{background:linear-gradient(90deg,var(--amber),#FCD34D)}
+.stat-card-bar.blue{background:linear-gradient(90deg,var(--blue),#60A5FA)}
+.stat-card-bar.red{background:linear-gradient(90deg,var(--red),#F87171)}
+.stat-icon{font-size:28px;margin-bottom:12px}
+.stat-num{font-size:36px;font-weight:900;line-height:1;margin-bottom:6px}
+.stat-num.green{color:var(--g2)}
+.stat-num.amber{color:var(--amber)}
+.stat-num.blue{color:var(--blue)}
+.stat-num.red{color:var(--red)}
+.stat-lbl{font-size:12px;font-weight:600;color:var(--s400);letter-spacing:.3px}
+.stat-sub{font-size:11px;color:var(--s300);margin-top:4px}
+
+/* ══════════════════════════════════════════
+   CARD
+══════════════════════════════════════════ */
+.card{background:white;border-radius:var(--r20);box-shadow:var(--sh-sm);border:1px solid var(--s100);overflow:hidden}
+.card-head{
+  padding:20px 24px;border-bottom:1px solid var(--s100);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
 }
-.card-title { font-size: 16px; font-weight: 700; color: var(--g2); }
-.card-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.card-title{font-size:16px;font-weight:800;color:var(--g2)}
+.card-subtitle{font-size:12px;color:var(--s400);margin-top:2px}
+.card-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* SEARCH */
-.search-input {
-  padding: 9px 14px 9px 36px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: 8px;
-  font-family: var(--font);
-  font-size: 13px;
-  outline: none;
-  width: 240px;
-  transition: all 0.2s;
-  background: var(--gray-50);
-  position: relative;
+.search-wrap{position:relative}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--s400);font-size:14px;pointer-events:none}
+.search-inp{
+  padding:9px 14px 9px 36px;border:1.5px solid var(--s200);border-radius:var(--r8);
+  font-family:var(--font);font-size:13px;color:var(--s800);
+  outline:none;width:260px;background:var(--s50);transition:var(--transition);
 }
-.search-input:focus { border-color: var(--g4); background: white; box-shadow: 0 0 0 3px rgba(82,183,136,0.1); }
-.search-wrap { position: relative; }
-.search-wrap::before {
-  content: '🔍';
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  pointer-events: none;
-}
+.search-inp:focus{border-color:var(--g4);background:white;box-shadow:0 0 0 3px rgba(82,183,136,.1);width:300px}
 
-/* BUTTONS */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-  white-space: nowrap;
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;padding:16px 24px;border-bottom:1px solid var(--s100);background:var(--s50)}
+.filter-btn{
+  padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--s200);background:white;color:var(--s600);
+  transition:var(--transition);
 }
-.btn-primary { background: linear-gradient(135deg, var(--g2), var(--g3)); color: white; }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,71,49,0.3); }
-.btn-secondary { background: var(--gray-100); color: var(--gray-700); }
-.btn-secondary:hover { background: var(--gray-200); }
-.btn-danger { background: var(--red-light); color: var(--red); }
-.btn-danger:hover { background: #FECACA; }
-.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
-.btn-icon { padding: 7px; border-radius: 6px; }
+.filter-btn:hover{border-color:var(--g4);color:var(--g3)}
+.filter-btn.active{background:var(--g2);border-color:var(--g2);color:white}
 
 /* TABLE */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead tr { background: var(--g7); }
-thead th {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--g2);
-  letter-spacing: 0.6px;
-  white-space: nowrap;
-  border-bottom: 2px solid var(--g6);
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--g7)}
+thead th{
+  padding:12px 16px;text-align:left;
+  font-size:10px;font-weight:800;color:var(--g2);
+  letter-spacing:.8px;white-space:nowrap;
+  border-bottom:2px solid var(--g6);text-transform:uppercase;
 }
-tbody tr {
-  border-bottom: 1px solid var(--gray-100);
-  transition: background 0.15s;
-}
-tbody tr:hover { background: var(--g7); }
-tbody tr:last-child { border-bottom: none; }
-tbody td { padding: 13px 16px; vertical-align: middle; }
+tbody tr{border-bottom:1px solid var(--s100);transition:background .12s}
+tbody tr:hover{background:var(--g7)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:14px 16px;vertical-align:middle}
 
-.lot-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--g6);
-  color: var(--g2);
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+/* LOT CHIP */
+.lot-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--g6);color:var(--g2);
+  padding:5px 12px;border-radius:var(--r8);
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  cursor:pointer;transition:var(--transition);white-space:nowrap;
+  border:1px solid transparent;
 }
-.lot-chip:hover { background: var(--g5); color: var(--g1); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.lot-chip:hover{background:var(--g2);color:white;transform:translateY(-1px);box-shadow:var(--sh-sm)}
 
 /* BADGES */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.badge-green { background: var(--g6); color: var(--g2); }
-.badge-yellow { background: var(--yellow-light); color: #92400E; }
-.badge-red { background: var(--red-light); color: #991B1B; }
-.badge-gray { background: var(--gray-100); color: var(--gray-600); }
-.badge-blue { background: var(--blue-light); color: #1D4ED8; }
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-green{background:var(--g6);color:var(--g2)}
+.b-amber{background:var(--amber-l);color:#92400E}
+.b-red{background:var(--red-l);color:#991B1B}
+.b-gray{background:var(--s100);color:var(--s600)}
+.b-blue{background:var(--blue-l);color:#1D4ED8}
 
-/* EMPTY / LOADING */
-.empty-state {
-  text-align: center;
-  padding: 64px 20px;
-  color: var(--gray-400);
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 20px;border-radius:var(--r8);
+  font-family:var(--font);font-size:13px;font-weight:700;
+  border:none;transition:var(--transition);white-space:nowrap;
 }
-.empty-icon { font-size: 52px; margin-bottom: 14px; opacity: 0.6; }
-.empty-title { font-size: 15px; font-weight: 600; color: var(--gray-500); margin-bottom: 6px; }
-.empty-sub { font-size: 13px; }
-.loading-state { text-align: center; padding: 40px; color: var(--gray-400); font-size: 14px; }
+.btn-primary{background:linear-gradient(135deg,var(--g2),var(--g3));color:white}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(26,71,49,.35)}
+.btn-secondary{background:var(--s100);color:var(--s700)}
+.btn-secondary:hover{background:var(--s200)}
+.btn-danger{background:var(--red-l);color:var(--red)}
+.btn-danger:hover{background:#FECACA}
+.btn-ghost{background:transparent;color:var(--s600);border:1.5px solid var(--s200)}
+.btn-ghost:hover{background:var(--s50);border-color:var(--s300)}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:var(--r4)}
+.btn-icon{padding:8px;border-radius:var(--r8)}
 
-/* ═══════════════════════════════
+/* EMPTY */
+.empty{text-align:center;padding:72px 20px}
+.empty-icon{font-size:56px;margin-bottom:16px;opacity:.5}
+.empty-title{font-size:16px;font-weight:700;color:var(--s500);margin-bottom:6px}
+.empty-sub{font-size:13px;color:var(--s400)}
+.loading{text-align:center;padding:48px;color:var(--s400);font-size:13px}
+
+/* ══════════════════════════════════════════
    MODAL
-═══════════════════════════════ */
-.overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  backdrop-filter: blur(2px);
+══════════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:200;
+  align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);
 }
-.overlay.open { display: flex; }
-.modal {
-  background: white;
-  border-radius: 20px;
-  width: 100%;
-  max-width: 640px;
-  max-height: 92vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg);
-  animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+.overlay.open{display:flex}
+.modal{
+  background:white;border-radius:var(--r24);
+  width:100%;max-width:660px;max-height:92vh;overflow-y:auto;
+  box-shadow:var(--sh-xl);animation:modalIn .28s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes modalIn {
-  from { transform: scale(0.92) translateY(20px); opacity: 0; }
-  to { transform: scale(1) translateY(0); opacity: 1; }
+.modal-wide{max-width:900px}
+@keyframes modalIn{from{transform:scale(.88) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-head{
+  padding:26px 32px 20px;border-bottom:1px solid var(--s100);
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;background:white;z-index:1;border-radius:var(--r24) var(--r24) 0 0;
 }
-.modal-header {
-  padding: 24px 28px 20px;
-  border-bottom: 1px solid var(--gray-100);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 1;
-  border-radius: 20px 20px 0 0;
+.modal-title{font-size:19px;font-weight:800;color:var(--g2)}
+.modal-close{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--s100);color:var(--s600);font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:var(--transition);
 }
-.modal-title { font-size: 18px; font-weight: 700; color: var(--g2); }
-.modal-close {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  border: none;
-  background: var(--gray-100);
-  font-size: 16px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gray-600);
-  transition: all 0.2s;
+.modal-close:hover{background:var(--s200);color:var(--s900)}
+.modal-body{padding:28px 32px}
+.modal-section{
+  font-size:11px;font-weight:800;color:var(--g3);
+  letter-spacing:1px;text-transform:uppercase;
+  padding:0 0 10px;margin:20px 0 14px;
+  border-bottom:2px solid var(--g6);
 }
-.modal-close:hover { background: var(--gray-200); color: var(--gray-900); }
-.modal-body { padding: 24px 28px; }
+.modal-section:first-child{margin-top:0}
 
 /* FORM */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group.full { grid-column: 1 / -1; }
-.form-label { font-size: 12px; font-weight: 600; color: var(--gray-600); letter-spacing: 0.3px; }
-.form-control {
-  padding: 10px 14px;
-  border: 1.5px solid var(--gray-200);
-  border-radius: 8px;
-  font-family: var(--font);
-  font-size: 14px;
-  color: var(--gray-900);
-  outline: none;
-  transition: all 0.2s;
-  background: var(--gray-50);
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:11px;font-weight:700;color:var(--s500);letter-spacing:.4px;text-transform:uppercase}
+.fc{
+  padding:11px 14px;border:1.5px solid var(--s200);border-radius:var(--r8);
+  font-family:var(--font);font-size:14px;color:var(--s900);
+  background:var(--s50);outline:none;transition:var(--transition);
+  width:100%;
 }
-.form-control:focus { border-color: var(--g4); background: white; box-shadow: 0 0 0 3px rgba(82,183,136,0.1); }
-textarea.form-control { resize: vertical; min-height: 80px; }
-.lot-preview {
-  background: linear-gradient(135deg, var(--g7), var(--g6));
-  border: 1.5px solid var(--g5);
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--g2);
-  text-align: center;
-  letter-spacing: 1px;
-  margin: 4px 0 8px;
+.fc:focus{border-color:var(--g4);background:white;box-shadow:0 0 0 3px rgba(82,183,136,.1)}
+textarea.fc{resize:vertical;min-height:80px}
+.lot-preview{
+  grid-column:1/-1;
+  background:linear-gradient(135deg,var(--g7),var(--g6));
+  border:2px solid var(--g5);border-radius:var(--r12);
+  padding:16px 20px;text-align:center;
+  font-family:var(--mono);font-size:18px;font-weight:700;
+  color:var(--g2);letter-spacing:2px;
 }
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--gray-100);
+.lot-preview-label{font-size:10px;font-weight:700;color:var(--g4);letter-spacing:1px;margin-bottom:6px}
+.form-actions{
+  display:flex;gap:10px;justify-content:flex-end;
+  margin-top:28px;padding-top:20px;border-top:1px solid var(--s100);
 }
 
-/* LOT DETAIL */
-.lot-detail-banner {
-  background: linear-gradient(135deg, var(--g1), var(--g2));
-  border-radius: 16px;
-  padding: 28px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-  flex-wrap: wrap;
+/* LOT DETAIL MODAL */
+.lot-banner{
+  background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 60%,var(--g3) 100%);
+  border-radius:var(--r16);padding:28px 32px;margin-bottom:24px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;
 }
-.lot-detail-num { font-family: var(--mono); font-size: 20px; font-weight: 500; color: white; letter-spacing: 1px; }
-.lot-detail-sub { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 6px; }
-.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.detail-item { background: var(--gray-50); border-radius: 10px; padding: 14px 16px; border: 1px solid var(--gray-100); }
-.detail-item-label { font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 0.6px; margin-bottom: 4px; }
-.detail-item-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
-.fiche-btn-wrap { text-align: center; margin-top: 16px; }
-.no-fiche {
-  text-align: center;
-  padding: 20px;
-  border: 2px dashed var(--gray-200);
-  border-radius: 12px;
-  color: var(--gray-400);
-  font-size: 13px;
-  margin-top: 16px;
+.lot-banner-left{}
+.lot-banner-num{
+  font-family:var(--mono);font-size:22px;font-weight:600;
+  color:white;letter-spacing:1.5px;margin-bottom:8px;
 }
-#qrBox { background: white; padding: 12px; border-radius: 12px; border: 2px solid var(--g6); display: inline-block; }
+.lot-banner-info{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.lot-banner-tag{
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
+}
+.lot-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.lot-detail-item{
+  background:var(--s50);border-radius:var(--r12);padding:14px 16px;
+  border:1px solid var(--s100);
+}
+.lot-detail-label{font-size:10px;font-weight:700;color:var(--s400);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+.lot-detail-value{font-size:14px;font-weight:600;color:var(--s800)}
+
+/* QR */
+#qrBox{background:white;padding:14px;border-radius:var(--r12);border:2px solid var(--g6);display:inline-block}
+
+/* LOT SECTION TABS */
+.lot-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.lot-tab{
+  padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--s200);background:white;color:var(--s600);
+  transition:var(--transition);
+}
+.lot-tab:hover{border-color:var(--g4);color:var(--g3)}
+.lot-tab.active{background:var(--g2);border-color:var(--g2);color:white}
+.lot-section{display:none}
+.lot-section.active{display:block}
+
+/* INLINE FORM */
+.inline-form{
+  background:var(--g7);border:1.5px solid var(--g6);
+  border-radius:var(--r12);padding:20px;margin-bottom:16px;
+}
+.inline-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
+.inline-form .fg label{color:var(--g3)}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:12px}
+.tl-item{
+  display:flex;gap:14px;padding:14px 16px;
+  background:white;border-radius:var(--r12);border:1px solid var(--s100);
+  transition:var(--transition);
+}
+.tl-item:hover{border-color:var(--g5);box-shadow:var(--sh-sm)}
+.tl-dot{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--g6);display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;margin-top:2px;
+}
+.tl-content{flex:1}
+.tl-title{font-size:14px;font-weight:700;color:var(--s800);margin-bottom:4px}
+.tl-meta{font-size:12px;color:var(--s400);display:flex;gap:12px;flex-wrap:wrap}
+.tl-delete{color:var(--red);background:var(--red-l);border:none;padding:4px 10px;border-radius:var(--r4);font-size:11px;font-weight:600;transition:var(--transition)}
+.tl-delete:hover{background:#FECACA}
+
+/* FICHE LINK */
+.fiche-box{
+  display:flex;align-items:center;gap:14px;
+  background:var(--g7);border:2px solid var(--g6);border-radius:var(--r12);
+  padding:16px 20px;margin-top:16px;
+}
+.fiche-icon{font-size:28px}
+.fiche-text{flex:1}
+.fiche-title{font-size:14px;font-weight:700;color:var(--g2)}
+.fiche-sub{font-size:12px;color:var(--s400);margin-top:2px}
+.no-fiche{
+  text-align:center;padding:24px;border:2px dashed var(--s200);
+  border-radius:var(--r12);color:var(--s400);font-size:13px;margin-top:16px;
+}
+
+/* STATS VIEW */
+.stats-view-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:24px}
+.stats-card{background:white;border-radius:var(--r16);padding:24px;box-shadow:var(--sh-sm);border:1px solid var(--s100)}
+.stats-card-title{font-size:14px;font-weight:700;color:var(--g2);margin-bottom:16px}
+.stats-row-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--s100)}
+.stats-row-item:last-child{border-bottom:none}
+.stats-row-label{font-size:13px;color:var(--s700);font-weight:500}
+.stats-row-val{font-size:14px;font-weight:700;color:var(--g2)}
+.progress-bar{height:6px;background:var(--s100);border-radius:3px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--g3),var(--g4));border-radius:3px;transition:width .6s ease}
 
 /* NOTIFICATION */
-.notif {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: var(--g2);
-  color: white;
-  padding: 14px 20px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: var(--shadow-lg);
-  z-index: 9999;
-  transform: translateY(80px);
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+.notif{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  padding:14px 22px;border-radius:var(--r12);font-size:14px;font-weight:600;
+  box-shadow:var(--sh-lg);transform:translateY(80px);opacity:0;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+  display:flex;align-items:center;gap:10px;
 }
-.notif.show { transform: translateY(0); opacity: 1; }
-.notif.error { background: var(--red); }
+.notif.show{transform:translateY(0);opacity:1}
+.notif-success{background:var(--g2);color:white}
+.notif-error{background:var(--red);color:white}
 
-@media (max-width: 640px) {
-  .content { padding: 16px; }
-  .form-grid { grid-template-columns: 1fr; }
-  .topbar { padding: 0 16px; }
-  .card-header { flex-direction: column; align-items: flex-start; }
-  .search-input { width: 100%; }
+/* LOADING OVERLAY */
+.loader{
+  position:fixed;inset:0;background:rgba(255,255,255,.8);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9998;backdrop-filter:blur(4px);display:none;
+}
+.loader-spin{
+  width:44px;height:44px;border:4px solid var(--g6);
+  border-top-color:var(--g3);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .header{padding:0 16px}
+  .content{padding:16px}
+  .form-grid,.inline-form-grid{grid-template-columns:1fr}
+  .modal-body{padding:20px}
+  .modal-head{padding:20px}
+  .nav-inner{padding:0 16px}
+  .search-inp{width:100%}
+  .search-inp:focus{width:100%}
+  .dash-stats{grid-template-columns:1fr 1fr}
+  .header-stat{display:none}
 }
 </style>
 </head>
@@ -534,170 +487,175 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-card">
-    <div class="login-brand">
-      <div class="login-icon">🌿</div>
-      <div class="login-name">QUALI-FLEG</div>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-top">
+        <div class="login-emblem">🌿</div>
+        <div class="login-brand">QUALI-FLEG</div>
+        <div class="login-sub">Système de Traçabilité Agricole</div>
+      </div>
+      <div class="login-field">
+        <label class="login-lbl">Mot de passe</label>
+        <input type="password" class="login-inp" id="pwdInp" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="login-btn" onclick="doLogin()"><span>Accéder au système →</span></button>
+      <div class="login-err" id="loginErr">❌ Mot de passe incorrect</div>
+      <div class="login-footer">Les Domaines • Station QUALI-FLEG • 2026</div>
     </div>
-    <p class="login-tagline">Système de Traçabilité — Accès Sécurisé</p>
-    <label class="login-label">MOT DE PASSE</label>
-    <input type="password" class="login-input" id="pwdInput" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')login()">
-    <button class="login-btn" onclick="login()">Se connecter →</button>
-    <div class="login-error" id="loginErr">❌ Mot de passe incorrect</div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <nav class="topbar">
-    <div class="topbar-left">
-      <span class="topbar-logo">🌿 QUALI-FLEG</span>
-      <span class="topbar-badge">TRAÇABILITÉ</span>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo">
+        <div class="header-icon">🌿</div>
+        <span class="header-name">QUALI-FLEG</span>
+      </div>
+      <div class="header-divider"></div>
+      <div class="header-domaines">les DOMAINES</div>
+      <span class="header-badge">TRAÇABILITÉ</span>
     </div>
-    <div class="topbar-right">
-      <span class="topbar-count" id="totalCount"></span>
-      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    <div class="header-right">
+      <div class="header-stat">
+        <div class="header-stat-num" id="hdr-total">0</div>
+        <div class="header-stat-lbl">LOTS TOTAL</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <button class="nav-tab active" onclick="goView('dashboard')">
+        <span class="nav-tab-icon">📊</span> Tableau de Bord
+      </button>
+      <button class="nav-tab" onclick="goView('lots')">
+        <span class="nav-tab-icon">📦</span> Registre des Lots
+        <span class="nav-tab-count" id="nav-count">0</span>
+      </button>
+      <button class="nav-tab" onclick="goView('stats')">
+        <span class="nav-tab-icon">📈</span> Statistiques
+      </button>
     </div>
   </nav>
 
-  <div class="tabs-wrap">
-    <div class="tabs">
-      <div class="tab active" onclick="goTab('lots')"><span class="tab-icon">📋</span> Registre des Lots</div>
-      <div class="tab" onclick="goTab('qualite')"><span class="tab-icon">✅</span> Agréage Qualité</div>
-      <div class="tab" onclick="goTab('production')"><span class="tab-icon">⚙️</span> Suivi Production</div>
-      <div class="tab" onclick="goTab('pf')"><span class="tab-icon">🔍</span> Contrôle PF</div>
-      <div class="tab" onclick="goTab('expedition')"><span class="tab-icon">🚚</span> Expédition</div>
-      <div class="tab" onclick="goTab('incidents')"><span class="tab-icon">⚠️</span> Incidents</div>
-    </div>
-  </div>
-
   <div class="content">
 
-    <!-- ── LOTS ── -->
-    <div class="page active" id="page-lots">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-num" id="s-tot">—</div><div class="stat-label">Total Lots</div></div>
-        <div class="stat-card yellow"><div class="stat-num" id="s-enc">—</div><div class="stat-label">En cours</div></div>
-        <div class="stat-card"><div class="stat-num" id="s-exp">—</div><div class="stat-label">Expédiés</div></div>
-        <div class="stat-card red"><div class="stat-num" id="s-ref">—</div><div class="stat-label">Refusés</div></div>
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="dash-stats">
+        <div class="stat-card">
+          <div class="stat-card-bar green"></div>
+          <div class="stat-icon">📦</div>
+          <div class="stat-num green" id="d-total">—</div>
+          <div class="stat-lbl">Total Lots</div>
+          <div class="stat-sub">Tous les lots reçus</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-bar amber"></div>
+          <div class="stat-icon">⏳</div>
+          <div class="stat-num amber" id="d-encours">—</div>
+          <div class="stat-lbl">En Cours</div>
+          <div class="stat-sub">En traitement</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-bar blue"></div>
+          <div class="stat-icon">🚚</div>
+          <div class="stat-num blue" id="d-expedie">—</div>
+          <div class="stat-lbl">Expédiés</div>
+          <div class="stat-sub">Livrés aux clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-bar red"></div>
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-num red" id="d-alerte">—</div>
+          <div class="stat-lbl">Alertes</div>
+          <div class="stat-sub">Bloqués / Refusés</div>
+        </div>
       </div>
+
+      <!-- Recent lots -->
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">Registre des Lots</span>
+        <div class="card-head">
+          <div>
+            <div class="card-title">Lots Récents</div>
+            <div class="card-subtitle">Les 10 derniers lots enregistrés</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('addLot')">+ Nouveau Lot</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>N° LOT</th><th>FOURNISSEUR</th><th>PRODUIT</th>
+              <th>DATE</th><th>QUANTITÉ</th><th>STATUT</th><th>ACTIONS</th>
+            </tr></thead>
+            <tbody id="dashLotsBody"><tr><td colspan="7"><div class="loading">⏳ Chargement...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOTS -->
+    <div class="view" id="view-lots">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Registre des Lots</div>
+            <div class="card-subtitle">Historique complet de tous les lots</div>
+          </div>
           <div class="card-actions">
-            <div class="search-wrap"><input class="search-input" placeholder="Rechercher..." oninput="filterLots(this.value)"></div>
+            <div class="search-wrap">
+              <span class="search-ico">🔍</span>
+              <input class="search-inp" placeholder="Rechercher un lot..." oninput="filterLots(this.value)" id="searchInp">
+            </div>
             <button class="btn btn-primary" onclick="openModal('addLot')">+ Nouveau Lot</button>
           </div>
         </div>
-        <div class="table-wrap">
+        <div class="filters" id="statusFilters">
+          <button class="filter-btn active" onclick="setFilter('all',this)">Tous</button>
+          <button class="filter-btn" onclick="setFilter('En attente',this)">⏸ En attente</button>
+          <button class="filter-btn" onclick="setFilter('En cours',this)">▶️ En cours</button>
+          <button class="filter-btn" onclick="setFilter('Expédié',this)">✅ Expédié</button>
+          <button class="filter-btn" onclick="setFilter('Bloqué',this)">🔴 Bloqué</button>
+          <button class="filter-btn" onclick="setFilter('Refusé',this)">❌ Refusé</button>
+        </div>
+        <div class="tbl-wrap">
           <table>
             <thead><tr>
               <th>N° LOT</th><th>N° FICHE</th><th>FOURNISSEUR</th><th>PRODUIT</th>
-              <th>VARIÉTÉ</th><th>ORIGINE</th><th>DATE RÉCEPTION</th><th>HEURE</th>
-              <th>QUANTITÉ</th><th>CONDITIONNEMENT</th><th>N° BL</th><th>STATUT</th><th>ACTIONS</th>
-            </tr></thead>
-            <tbody id="lotsBody"><tr><td colspan="13"><div class="loading-state">⏳ Chargement...</div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── QUALITÉ ── -->
-    <div class="page" id="page-qualite">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Agréage Qualité à Réception</span>
-          <button class="btn btn-primary" onclick="openModal('addQualite')">+ Nouveau Contrôle</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>N° LOT</th><th>N° FICHE</th><th>DATE CONTRÔLE</th><th>CONTRÔLEUR</th>
-              <th>ASPECT</th><th>CALIBRE</th><th>MATURITÉ</th><th>CONFORMITÉ</th>
-              <th>DÉCISION</th><th>OBSERVATIONS</th><th>ACTIONS</th>
-            </tr></thead>
-            <tbody id="qualiteBody"><tr><td colspan="11"><div class="loading-state">⏳ Chargement...</div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── PRODUCTION ── -->
-    <div class="page" id="page-production">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Suivi des Opérations Internes</span>
-          <button class="btn btn-primary" onclick="openModal('addProduction')">+ Nouvelle Opération</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>N° LOT</th><th>OPÉRATION</th><th>DATE DÉBUT</th><th>DATE FIN</th>
-              <th>DURÉE</th><th>QTÉ ENTRÉE</th><th>QTÉ SORTIE</th>
-              <th>% PERTE</th><th>RESPONSABLE</th><th>OBSERVATIONS</th><th>ACTIONS</th>
-            </tr></thead>
-            <tbody id="productionBody"><tr><td colspan="11"><div class="loading-state">⏳ Chargement...</div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── PF ── -->
-    <div class="page" id="page-pf">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Contrôle Produit Fini (Libératoire)</span>
-          <button class="btn btn-primary" onclick="openModal('addPF')">+ Nouveau Contrôle</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>N° LOT</th><th>DATE</th><th>CONTRÔLEUR</th><th>QTÉ CONTRÔLÉE</th>
-              <th>QTÉ CONFORME</th><th>% ÉCART</th><th>RÉSULTAT</th><th>LIBÉRATION</th>
-              <th>OBSERVATIONS</th><th>ACTIONS</th>
-            </tr></thead>
-            <tbody id="pfBody"><tr><td colspan="10"><div class="loading-state">⏳ Chargement...</div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── EXPÉDITION ── -->
-    <div class="page" id="page-expedition">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Expédition</span>
-          <button class="btn btn-primary" onclick="openModal('addExpedition')">+ Nouvelle Expédition</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>N° LOT</th><th>DATE</th><th>CLIENT</th><th>DESTINATION</th>
-              <th>QTÉ</th><th>N° BL SORTIE</th><th>TRANSPORTEUR</th>
-              <th>STATUT</th><th>OBSERVATIONS</th><th>ACTIONS</th>
-            </tr></thead>
-            <tbody id="expeditionBody"><tr><td colspan="10"><div class="loading-state">⏳ Chargement...</div></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── INCIDENTS ── -->
-    <div class="page" id="page-incidents">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Observations & Incidents</span>
-          <button class="btn btn-primary" onclick="openModal('addIncident')">+ Nouvel Incident</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>N° LOT</th><th>DATE</th><th>TYPE</th><th>DESCRIPTION</th>
-              <th>CONCERNÉ</th><th>ACTION CORRECTIVE</th><th>RESPONSABLE</th>
+              <th>VARIÉTÉ</th><th>ORIGINE</th><th>DATE</th><th>HEURE</th>
+              <th>QUANTITÉ</th><th>CONDITIONNEMENT</th><th>N° BL</th>
               <th>STATUT</th><th>ACTIONS</th>
             </tr></thead>
-            <tbody id="incidentsBody"><tr><td colspan="9"><div class="loading-state">⏳ Chargement...</div></td></tr></tbody>
+            <tbody id="lotsBody"><tr><td colspan="13"><div class="loading">⏳ Chargement...</div></td></tr></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="view" id="view-stats">
+      <div class="stats-view-grid">
+        <div class="stats-card">
+          <div class="stats-card-title">📊 Répartition par Statut</div>
+          <div id="stat-statuts"></div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">🏭 Top Fournisseurs</div>
+          <div id="stat-fournisseurs"></div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">🥦 Top Produits</div>
+          <div id="stat-produits"></div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">📅 Lots cette semaine</div>
+          <div id="stat-semaine"></div>
         </div>
       </div>
     </div>
@@ -705,620 +663,662 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     MODALS
-═══════════════════════════════ -->
-
-<!-- ADD LOT -->
+<!-- ══════════════════════════════════════════
+     MODAL — NOUVEAU LOT
+══════════════════════════════════════════ -->
 <div class="overlay" id="modal-addLot">
 <div class="modal">
-  <div class="modal-header">
-    <span class="modal-title">➕ Nouveau Lot</span>
+  <div class="modal-head">
+    <span class="modal-title">📦 Nouveau Lot</span>
     <button class="modal-close" onclick="closeModal('addLot')">✕</button>
   </div>
   <div class="modal-body">
+    <div class="modal-section">Génération du N° de Lot</div>
     <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">ABR. FOURNISSEUR (3 lettres)</label>
-        <input class="form-control" id="f-abrf" maxlength="3" placeholder="AHF" oninput="updatePreview()" style="text-transform:uppercase">
+      <div class="fg">
+        <label>ABR. FOURNISSEUR (3 lettres)</label>
+        <input class="fc" id="fa" maxlength="3" placeholder="ex: AHF" oninput="updPrev()" style="text-transform:uppercase;font-family:var(--mono);letter-spacing:2px">
       </div>
-      <div class="form-group">
-        <label class="form-label">ABR. PRODUIT (3 lettres)</label>
-        <input class="form-control" id="f-abrp" maxlength="3" placeholder="TOM" oninput="updatePreview()" style="text-transform:uppercase">
+      <div class="fg">
+        <label>ABR. PRODUIT (3 lettres)</label>
+        <input class="fc" id="fb" maxlength="3" placeholder="ex: TOM" oninput="updPrev()" style="text-transform:uppercase;font-family:var(--mono);letter-spacing:2px">
       </div>
-      <div class="form-group">
-        <label class="form-label">N° FICHE</label>
-        <input class="form-control" id="f-fiche" type="number" placeholder="001" oninput="updatePreview()">
+      <div class="fg">
+        <label>N° FICHE</label>
+        <input class="fc" id="fc_" type="number" placeholder="1" min="1" oninput="updPrev()">
       </div>
-      <div class="form-group">
-        <label class="form-label">DATE DE RÉCEPTION</label>
-        <input class="form-control" id="f-date" type="date" oninput="updatePreview()">
+      <div class="fg">
+        <label>DATE DE RÉCEPTION</label>
+        <input class="fc" id="fd" type="date" oninput="updPrev()">
+      </div>
+      <div class="full" style="grid-column:1/-1">
+        <div class="lot-preview-label">NUMÉRO DE LOT GÉNÉRÉ</div>
+        <div class="lot-preview" id="lotPrev">???-???-??????-???</div>
       </div>
     </div>
-    <div class="lot-preview" id="lotPreview">N° LOT : ???-???-??????-???</div>
+
+    <div class="modal-section">Informations du Produit</div>
     <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">FOURNISSEUR / FERME</label>
-        <input class="form-control" id="f-frs" placeholder="Nom complet">
-      </div>
-      <div class="form-group">
-        <label class="form-label">PRODUIT</label>
-        <input class="form-control" id="f-prod" placeholder="ex: Tomate">
-      </div>
-      <div class="form-group">
-        <label class="form-label">VARIÉTÉ</label>
-        <input class="form-control" id="f-var" placeholder="ex: Cherry">
-      </div>
-      <div class="form-group">
-        <label class="form-label">ORIGINE</label>
-        <input class="form-control" id="f-orig" placeholder="ex: Agadir">
-      </div>
-      <div class="form-group">
-        <label class="form-label">HEURE DE RÉCEPTION</label>
-        <input class="form-control" id="f-heure" type="time">
-      </div>
-      <div class="form-group">
-        <label class="form-label">QUANTITÉ (kg/u)</label>
-        <input class="form-control" id="f-qte" type="number" placeholder="500">
-      </div>
-      <div class="form-group">
-        <label class="form-label">CONDITIONNEMENT</label>
-        <select class="form-control" id="f-cond">
+      <div class="fg"><label>FOURNISSEUR / FERME</label><input class="fc" id="fFrs" placeholder="Nom complet du fournisseur"></div>
+      <div class="fg"><label>PRODUIT</label><input class="fc" id="fProd" placeholder="ex: Tomate, Courgette..."></div>
+      <div class="fg"><label>VARIÉTÉ</label><input class="fc" id="fVar" placeholder="ex: Cherry, Ronde..."></div>
+      <div class="fg"><label>ORIGINE</label><input class="fc" id="fOrig" placeholder="ex: Agadir, Marrakech..."></div>
+    </div>
+
+    <div class="modal-section">Réception & Conditionnement</div>
+    <div class="form-grid">
+      <div class="fg"><label>HEURE DE RÉCEPTION</label><input class="fc" id="fHeure" type="time"></div>
+      <div class="fg"><label>QUANTITÉ (kg/u)</label><input class="fc" id="fQte" type="number" placeholder="ex: 500"></div>
+      <div class="fg"><label>TYPE DE CONDITIONNEMENT</label>
+        <select class="fc" id="fCond">
           <option value="">— Choisir —</option>
           <option>Cagette</option><option>Carton</option><option>Filet</option>
           <option>Vrac</option><option>Palette</option><option>Autre</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">N° BON DE LIVRAISON</label>
-        <input class="form-control" id="f-bl" placeholder="BL-2026-0001">
-      </div>
-      <div class="form-group">
-        <label class="form-label">STATUT</label>
-        <select class="form-control" id="f-stat">
+      <div class="fg"><label>N° BON DE LIVRAISON</label><input class="fc" id="fBL" placeholder="ex: BL-2026-0001"></div>
+      <div class="fg"><label>STATUT</label>
+        <select class="fc" id="fStat">
           <option>En attente</option><option>En cours</option>
           <option>Expédié</option><option>Bloqué</option><option>Refusé</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">LIEN FICHE (Google Drive)</label>
-        <input class="form-control" id="f-lien" placeholder="https://drive.google.com/...">
-      </div>
+      <div class="fg"><label>LIEN FICHE (Google Drive)</label><input class="fc" id="fLien" placeholder="https://drive.google.com/..."></div>
     </div>
+
     <div class="form-actions">
       <button class="btn btn-secondary" onclick="closeModal('addLot')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveLot()">💾 Enregistrer</button>
+      <button class="btn btn-primary" onclick="saveLot()">💾 Enregistrer le Lot</button>
     </div>
   </div>
 </div>
 </div>
 
-<!-- LOT DETAIL -->
+<!-- ══════════════════════════════════════════
+     MODAL — DÉTAIL LOT
+══════════════════════════════════════════ -->
 <div class="overlay" id="modal-lotDetail">
-<div class="modal" style="max-width:720px">
-  <div class="modal-header">
-    <span class="modal-title">📦 Détail du Lot</span>
+<div class="modal modal-wide">
+  <div class="modal-head">
+    <span class="modal-title" id="detailTitle">Détail du Lot</span>
     <button class="modal-close" onclick="closeModal('lotDetail')">✕</button>
   </div>
-  <div class="modal-body" id="lotDetailBody"></div>
-</div>
-</div>
-
-<!-- ADD QUALITE -->
-<div class="overlay" id="modal-addQualite">
-<div class="modal">
-  <div class="modal-header">
-    <span class="modal-title">✅ Nouveau Contrôle Qualité</span>
-    <button class="modal-close" onclick="closeModal('addQualite')">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">N° LOT</label><input class="form-control" id="q-lot" placeholder="AHF-TOM-110426-001"></div>
-      <div class="form-group"><label class="form-label">N° FICHE</label><input class="form-control" id="q-fiche" placeholder="001"></div>
-      <div class="form-group"><label class="form-label">DATE CONTRÔLE</label><input class="form-control" id="q-date" type="date"></div>
-      <div class="form-group"><label class="form-label">CONTRÔLEUR</label><input class="form-control" id="q-ctrl" placeholder="Nom"></div>
-      <div class="form-group"><label class="form-label">ASPECT VISUEL</label>
-        <select class="form-control" id="q-asp"><option value="">—</option><option>Conforme</option><option>Non conforme</option><option>À vérifier</option></select></div>
-      <div class="form-group"><label class="form-label">CALIBRE</label>
-        <select class="form-control" id="q-cal"><option value="">—</option><option>Conforme</option><option>Non conforme</option><option>À vérifier</option></select></div>
-      <div class="form-group"><label class="form-label">MATURITÉ</label>
-        <select class="form-control" id="q-mat"><option value="">—</option><option>Conforme</option><option>Trop mûr</option><option>Pas assez mûr</option></select></div>
-      <div class="form-group"><label class="form-label">TAUX CONFORMITÉ (%)</label><input class="form-control" id="q-taux" type="number" min="0" max="100" placeholder="95"></div>
-      <div class="form-group"><label class="form-label">DÉCISION</label>
-        <select class="form-control" id="q-dec"><option value="">—</option><option>Accepté</option><option>Accepté sous réserve</option><option>Refusé</option></select></div>
-      <div class="form-group full"><label class="form-label">OBSERVATIONS</label><textarea class="form-control" id="q-obs" placeholder="Remarques..."></textarea></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeModal('addQualite')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveQualite()">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ADD PRODUCTION -->
-<div class="overlay" id="modal-addProduction">
-<div class="modal">
-  <div class="modal-header">
-    <span class="modal-title">⚙️ Nouvelle Opération</span>
-    <button class="modal-close" onclick="closeModal('addProduction')">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">N° LOT</label><input class="form-control" id="p-lot" placeholder="AHF-TOM-110426-001"></div>
-      <div class="form-group"><label class="form-label">OPÉRATION</label>
-        <select class="form-control" id="p-op"><option value="">—</option><option>Triage</option><option>Reconditionnement</option><option>Stockage</option><option>Lavage</option><option>Calibrage</option><option>Emballage</option></select></div>
-      <div class="form-group"><label class="form-label">DATE & HEURE DÉBUT</label><input class="form-control" id="p-deb" type="datetime-local"></div>
-      <div class="form-group"><label class="form-label">DATE & HEURE FIN</label><input class="form-control" id="p-fin" type="datetime-local"></div>
-      <div class="form-group"><label class="form-label">QTÉ ENTRÉE (kg/u)</label><input class="form-control" id="p-in" type="number" placeholder="500"></div>
-      <div class="form-group"><label class="form-label">QTÉ SORTIE (kg/u)</label><input class="form-control" id="p-out" type="number" placeholder="480"></div>
-      <div class="form-group"><label class="form-label">RESPONSABLE</label><input class="form-control" id="p-resp" placeholder="Nom"></div>
-      <div class="form-group full"><label class="form-label">OBSERVATIONS</label><textarea class="form-control" id="p-obs" placeholder="Remarques..."></textarea></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeModal('addProduction')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveProduction()">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ADD PF -->
-<div class="overlay" id="modal-addPF">
-<div class="modal">
-  <div class="modal-header">
-    <span class="modal-title">🔍 Contrôle Produit Fini</span>
-    <button class="modal-close" onclick="closeModal('addPF')">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">N° LOT</label><input class="form-control" id="pf-lot" placeholder="AHF-TOM-110426-001"></div>
-      <div class="form-group"><label class="form-label">DATE CONTRÔLE</label><input class="form-control" id="pf-date" type="date"></div>
-      <div class="form-group"><label class="form-label">CONTRÔLEUR</label><input class="form-control" id="pf-ctrl" placeholder="Nom"></div>
-      <div class="form-group"><label class="form-label">QTÉ CONTRÔLÉE (kg/u)</label><input class="form-control" id="pf-qc" type="number"></div>
-      <div class="form-group"><label class="form-label">QTÉ CONFORME (kg/u)</label><input class="form-control" id="pf-qf" type="number"></div>
-      <div class="form-group"><label class="form-label">RÉSULTAT</label>
-        <select class="form-control" id="pf-res"><option value="">—</option><option>Conforme</option><option>Non conforme</option></select></div>
-      <div class="form-group"><label class="form-label">LIBÉRATION</label>
-        <select class="form-control" id="pf-lib"><option value="">—</option><option>Libéré</option><option>Bloqué</option><option>En attente</option></select></div>
-      <div class="form-group full"><label class="form-label">OBSERVATIONS</label><textarea class="form-control" id="pf-obs" placeholder="Remarques..."></textarea></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeModal('addPF')">Annuler</button>
-      <button class="btn btn-primary" onclick="savePF()">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ADD EXPEDITION -->
-<div class="overlay" id="modal-addExpedition">
-<div class="modal">
-  <div class="modal-header">
-    <span class="modal-title">🚚 Nouvelle Expédition</span>
-    <button class="modal-close" onclick="closeModal('addExpedition')">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">N° LOT</label><input class="form-control" id="e-lot" placeholder="AHF-TOM-110426-001"></div>
-      <div class="form-group"><label class="form-label">DATE EXPÉDITION</label><input class="form-control" id="e-date" type="date"></div>
-      <div class="form-group"><label class="form-label">CLIENT</label><input class="form-control" id="e-cli" placeholder="Nom du client"></div>
-      <div class="form-group"><label class="form-label">DESTINATION</label><input class="form-control" id="e-dest" placeholder="Ville / Région"></div>
-      <div class="form-group"><label class="form-label">QTÉ EXPÉDIÉE (kg/u)</label><input class="form-control" id="e-qte" type="number"></div>
-      <div class="form-group"><label class="form-label">N° BL SORTIE</label><input class="form-control" id="e-bl" placeholder="BLS-2026-001"></div>
-      <div class="form-group"><label class="form-label">TRANSPORTEUR</label><input class="form-control" id="e-trans" placeholder="Nom transporteur"></div>
-      <div class="form-group"><label class="form-label">STATUT</label>
-        <select class="form-control" id="e-stat"><option value="">—</option><option>Livré</option><option>En transit</option><option>En attente</option><option>Annulé</option><option>Retour</option></select></div>
-      <div class="form-group full"><label class="form-label">OBSERVATIONS</label><textarea class="form-control" id="e-obs" placeholder="Remarques..."></textarea></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeModal('addExpedition')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveExpedition()">💾 Enregistrer</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ADD INCIDENT -->
-<div class="overlay" id="modal-addIncident">
-<div class="modal">
-  <div class="modal-header">
-    <span class="modal-title">⚠️ Nouvel Incident</span>
-    <button class="modal-close" onclick="closeModal('addIncident')">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="form-grid">
-      <div class="form-group"><label class="form-label">N° LOT</label><input class="form-control" id="i-lot" placeholder="AHF-TOM-110426-001"></div>
-      <div class="form-group"><label class="form-label">DATE</label><input class="form-control" id="i-date" type="date"></div>
-      <div class="form-group"><label class="form-label">TYPE D'INCIDENT</label>
-        <select class="form-control" id="i-type"><option value="">—</option><option>Retour client</option><option>Refus réception</option><option>Réclamation</option><option>Commande annulée</option><option>Non-conformité</option><option>Autre</option></select></div>
-      <div class="form-group"><label class="form-label">RESPONSABLE</label><input class="form-control" id="i-resp" placeholder="Nom"></div>
-      <div class="form-group"><label class="form-label">CONCERNÉ</label><input class="form-control" id="i-conc" placeholder="Client / Fournisseur"></div>
-      <div class="form-group"><label class="form-label">STATUT</label>
-        <select class="form-control" id="i-stat"><option value="">—</option><option>Ouvert</option><option>En cours</option><option>Clôturé</option></select></div>
-      <div class="form-group full"><label class="form-label">DESCRIPTION</label><textarea class="form-control" id="i-desc" placeholder="Décrivez l'incident..."></textarea></div>
-      <div class="form-group full"><label class="form-label">ACTION CORRECTIVE</label><textarea class="form-control" id="i-act" placeholder="Actions prises..."></textarea></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeModal('addIncident')">Annuler</button>
-      <button class="btn btn-primary" onclick="saveIncident()">💾 Enregistrer</button>
-    </div>
-  </div>
+  <div class="modal-body" id="detailBody"></div>
 </div>
 </div>
 
 <!-- NOTIFICATION -->
 <div class="notif" id="notif"></div>
+<!-- LOADER -->
+<div class="loader" id="loader"><div class="loader-spin"></div></div>
 
 <script>
-const SB_URL = 'https://pyvzsxsijpteeohotfcb.supabase.co';
-const SB_KEY = 'sb_publishable_09gS-G2Msq6i_6azzn9oGw_PG8L2A53';
-const PWD    = 'Quali-Fleg2026';
+// ── CONFIG ──────────────────────────────────────────────
+const SB  = 'https://pyvzsxsijpteeohotfcb.supabase.co';
+const KEY = 'sb_publishable_09gS-G2Msq6i_6azzn9oGw_PG8L2A53';
+const PWD = 'Quali-Fleg2026';
 
-// ── AUTH ──────────────────────────────
-function login() {
-  if (document.getElementById('pwdInput').value === PWD) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadLots();
+// ── STATE ───────────────────────────────────────────────
+let allLots = [];
+let currentFilter = 'all';
+let currentLotId = null;
+
+// ── AUTH ────────────────────────────────────────────────
+function doLogin() {
+  if (G('pwdInp').value === PWD) {
+    G('loginScreen').style.display = 'none';
+    G('app').style.display = 'block';
+    init();
   } else {
-    const e = document.getElementById('loginErr');
+    const e = G('loginErr');
     e.style.display = 'block';
-    setTimeout(() => e.style.display = 'none', 3000);
+    G('pwdInp').style.borderColor = 'var(--red)';
+    setTimeout(() => { e.style.display = 'none'; G('pwdInp').style.borderColor = ''; }, 3000);
   }
 }
-function logout() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('pwdInput').value = '';
+function doLogout() {
+  G('loginScreen').style.display = 'flex';
+  G('app').style.display = 'none';
+  G('pwdInp').value = '';
 }
 
-// ── DB ────────────────────────────────
+// ── DB ──────────────────────────────────────────────────
 async function db(method, table, body, filter = '') {
-  const res = await fetch(`${SB_URL}/rest/v1/${table}${filter}`, {
-    method,
-    headers: {
-      'apikey': SB_KEY,
-      'Authorization': `Bearer ${SB_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
-    },
-    body: body ? JSON.stringify(body) : null
-  });
-  if (method === 'GET') return res.ok ? res.json() : [];
-  return res;
+  try {
+    const res = await fetch(`${SB}/rest/v1/${table}${filter}`, {
+      method,
+      headers: {
+        'apikey': KEY, 'Authorization': `Bearer ${KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+      },
+      body: body ? JSON.stringify(body) : null
+    });
+    if (method === 'GET') return res.ok ? res.json() : [];
+    return res;
+  } catch(e) { return []; }
 }
 
-// ── NOTIFY ────────────────────────────
-function notify(msg, isError = false) {
-  const n = document.getElementById('notif');
+// ── HELPERS ─────────────────────────────────────────────
+const G = id => document.getElementById(id);
+const V = id => G(id)?.value || '';
+const badge = s => {
+  if (!s) return '<span class="badge b-gray">—</span>';
+  const m = {'En cours':'b-amber','En attente':'b-gray','Expédié':'b-green','Livré':'b-green',
+    'Bloqué':'b-red','Refusé':'b-red','Accepté':'b-green','Conforme':'b-green',
+    'Non conforme':'b-red','Libéré':'b-green','Ouvert':'b-red','Clôturé':'b-green',
+    'En transit':'b-amber','Accepté sous réserve':'b-amber','À vérifier':'b-amber'};
+  return `<span class="badge ${m[s]||'b-gray'}">${s}</span>`;
+};
+const emptyState = (cols, icon, title, sub) =>
+  `<tr><td colspan="${cols}"><div class="empty"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub||''}</div></div></td></tr>`;
+const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('fr-FR') : '—';
+
+function notify(msg, isErr = false) {
+  const n = G('notif');
   n.textContent = msg;
-  n.className = 'notif' + (isError ? ' error' : '');
-  n.classList.add('show');
-  setTimeout(() => n.classList.remove('show'), 3000);
+  n.className = `notif ${isErr?'notif-error':'notif-success'} show`;
+  setTimeout(() => n.classList.remove('show'), 3500);
+}
+function showLoader() { G('loader').style.display = 'flex'; }
+function hideLoader() { G('loader').style.display = 'none'; }
+
+// ── INIT ────────────────────────────────────────────────
+async function init() {
+  await loadLots();
+  renderDashRecent();
+  renderStats();
 }
 
-// ── TABS ──────────────────────────────
-const tabPages = ['lots','qualite','production','pf','expedition','incidents'];
-const tabLoaders = { lots: loadLots, qualite: loadQualite, production: loadProduction, pf: loadPF, expedition: loadExpedition, incidents: loadIncidents };
-
-function goTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabPages[i] === name));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${name}`).classList.add('active');
-  tabLoaders[name]();
+// ── VIEWS ───────────────────────────────────────────────
+function goView(name) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    const names = ['dashboard','lots','stats'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  G(`view-${name}`).classList.add('active');
+  if (name === 'stats') renderStats();
 }
 
-// ── MODALS ────────────────────────────
+// ── MODALS ──────────────────────────────────────────────
 function openModal(name) {
-  document.getElementById(`modal-${name}`).classList.add('open');
+  G(`modal-${name}`).classList.add('open');
   if (name === 'addLot') {
-    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
-    updatePreview();
+    G('fd').value = new Date().toISOString().split('T')[0];
+    updPrev();
   }
 }
-function closeModal(name) { document.getElementById(`modal-${name}`).classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+function closeModal(name) { G(`modal-${name}`).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o =>
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
+);
 
-// ── LOT PREVIEW ───────────────────────
-function updatePreview() {
-  const a1 = (document.getElementById('f-abrf').value || '???').toUpperCase().slice(0,3).padEnd(3,'?');
-  const a2 = (document.getElementById('f-abrp').value || '???').toUpperCase().slice(0,3).padEnd(3,'?');
-  const d  = document.getElementById('f-date').value;
-  const f  = document.getElementById('f-fiche').value;
+// ── LOT PREVIEW ─────────────────────────────────────────
+function updPrev() {
+  const a = (V('fa')||'???').toUpperCase().slice(0,3).padEnd(3,'?');
+  const b = (V('fb')||'???').toUpperCase().slice(0,3).padEnd(3,'?');
+  const d = V('fd');
+  const f = V('fc_');
   const ds = d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}).replace(/\//g,'') : '??????';
   const fs = f ? String(f).padStart(3,'0') : '???';
-  document.getElementById('lotPreview').textContent = `${a1}-${a2}-${ds}-${fs}`;
+  G('lotPrev').textContent = `${a}-${b}-${ds}-${fs}`;
 }
 
-// ── BADGES ────────────────────────────
-function badge(s) {
-  if (!s) return '<span class="badge badge-gray">—</span>';
-  const m = {
-    'En cours':'yellow','En attente':'gray','Expédié':'green','Livré':'green',
-    'Bloqué':'red','Refusé':'red','Accepté':'green','Conforme':'green',
-    'Non conforme':'red','Libéré':'green','Ouvert':'red','Clôturé':'green',
-    'En transit':'yellow','Accepté sous réserve':'yellow','Trop mûr':'yellow',
-    'Pas assez mûr':'yellow','À vérifier':'yellow'
-  };
-  return `<span class="badge badge-${m[s]||'gray'}">${s}</span>`;
-}
-
-// ── LOTS ──────────────────────────────
-let allLots = [];
-
+// ── LOTS ────────────────────────────────────────────────
 async function loadLots() {
-  try {
-    const data = await db('GET','lots',null,'?order=created_at.desc');
-    allLots = Array.isArray(data) ? data : [];
-    renderLots(allLots);
-    updateStats(allLots);
-  } catch(e) {
-    document.getElementById('lotsBody').innerHTML = `<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur de connexion</div><div class="empty-sub">Vérifiez que les tables Supabase sont créées</div></div></td></tr>`;
-  }
+  const data = await db('GET','lots',null,'?order=created_at.desc');
+  allLots = Array.isArray(data) ? data : [];
+  G('d-total').textContent = allLots.length;
+  G('d-encours').textContent = allLots.filter(l=>l.statut==='En cours').length;
+  G('d-expedie').textContent = allLots.filter(l=>l.statut==='Expédié').length;
+  G('d-alerte').textContent = allLots.filter(l=>l.statut==='Bloqué'||l.statut==='Refusé').length;
+  G('hdr-total').textContent = allLots.length;
+  G('nav-count').textContent = allLots.length;
+  renderLots();
+  renderDashRecent();
 }
 
-function renderLots(lots) {
-  const tbody = document.getElementById('lotsBody');
+function renderLots() {
+  let lots = allLots;
+  const q = V('searchInp').toLowerCase();
+  if (q) lots = lots.filter(l => [l.num_lot,l.fournisseur,l.produit,l.variete,l.origine,l.num_bl].some(v=>(v||'').toLowerCase().includes(q)));
+  if (currentFilter !== 'all') lots = lots.filter(l => l.statut === currentFilter);
+
+  const tbody = G('lotsBody');
   if (!lots.length) {
-    tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Aucun lot enregistré</div><div class="empty-sub">Cliquez sur + Nouveau Lot pour commencer</div></div></td></tr>`;
+    tbody.innerHTML = emptyState(13,'📦','Aucun lot trouvé','Ajoutez un nouveau lot ou modifiez vos filtres');
     return;
   }
   tbody.innerHTML = lots.map(l => `<tr>
     <td><span class="lot-chip" onclick="showLot(${l.id})">🔗 ${l.num_lot||'—'}</span></td>
-    <td><b>${l.num_fiche||'—'}</b></td>
+    <td><strong>${l.num_fiche||'—'}</strong></td>
     <td>${l.fournisseur||'—'}</td>
     <td>${l.produit||'—'}</td>
     <td>${l.variete||'—'}</td>
     <td>${l.origine||'—'}</td>
-    <td>${l.date_reception||'—'}</td>
+    <td>${fmt(l.date_reception)}</td>
     <td>${l.heure_reception||'—'}</td>
-    <td>${l.quantite ? l.quantite+' kg/u' : '—'}</td>
+    <td>${l.quantite?l.quantite+' kg/u':'—'}</td>
     <td>${l.conditionnement||'—'}</td>
     <td>${l.num_bl||'—'}</td>
     <td>${badge(l.statut)}</td>
     <td>
       <div style="display:flex;gap:6px;align-items:center">
-        ${l.lien_fiche ? `<a href="${l.lien_fiche}" target="_blank" class="btn btn-sm btn-primary">📄</a>` : '<span style="font-size:11px;color:#ccc">—</span>'}
-        <button class="btn btn-sm btn-danger" onclick="delRow('lots',${l.id},loadLots)">🗑</button>
+        <button class="btn btn-sm btn-primary" onclick="showLot(${l.id})">👁 Voir</button>
+        ${l.lien_fiche?`<a href="${l.lien_fiche}" target="_blank" class="btn btn-sm btn-ghost">📄</a>`:''}
+        <button class="btn btn-sm btn-danger btn-icon" onclick="delLot(${l.id})">🗑</button>
       </div>
     </td>
   </tr>`).join('');
 }
 
-function filterLots(q) {
-  renderLots(allLots.filter(l =>
-    [l.num_lot,l.fournisseur,l.produit,l.variete,l.origine].some(v => (v||'').toLowerCase().includes(q.toLowerCase()))
-  ));
+function renderDashRecent() {
+  const lots = allLots.slice(0,10);
+  const tbody = G('dashLotsBody');
+  if (!lots.length) {
+    tbody.innerHTML = emptyState(7,'📦','Aucun lot enregistré','Cliquez sur + Nouveau Lot pour commencer');
+    return;
+  }
+  tbody.innerHTML = lots.map(l => `<tr>
+    <td><span class="lot-chip" onclick="showLot(${l.id})">🔗 ${l.num_lot||'—'}</span></td>
+    <td>${l.fournisseur||'—'}</td>
+    <td>${l.produit||'—'} ${l.variete?'<span style="color:var(--s400);font-size:12px">'+l.variete+'</span>':''}</td>
+    <td>${fmt(l.date_reception)}</td>
+    <td>${l.quantite?l.quantite+' kg/u':'—'}</td>
+    <td>${badge(l.statut)}</td>
+    <td>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-primary" onclick="showLot(${l.id})">👁 Voir</button>
+        ${l.lien_fiche?`<a href="${l.lien_fiche}" target="_blank" class="btn btn-sm btn-ghost">📄</a>`:''}
+      </div>
+    </td>
+  </tr>`).join('');
 }
 
-function updateStats(lots) {
-  document.getElementById('s-tot').textContent = lots.length;
-  document.getElementById('s-enc').textContent = lots.filter(l=>l.statut==='En cours').length;
-  document.getElementById('s-exp').textContent = lots.filter(l=>l.statut==='Expédié').length;
-  document.getElementById('s-ref').textContent = lots.filter(l=>l.statut==='Refusé').length;
-  document.getElementById('totalCount').textContent = `${lots.length} lots`;
+function filterLots(q) { renderLots(); }
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderLots();
 }
 
 async function saveLot() {
-  const a1 = document.getElementById('f-abrf').value.toUpperCase();
-  const a2 = document.getElementById('f-abrp').value.toUpperCase();
-  const d  = document.getElementById('f-date').value;
-  const f  = document.getElementById('f-fiche').value;
-  if (!a1||!a2||!d||!f) { notify('⚠️ Remplissez les 4 champs du N° de lot', true); return; }
+  const a = V('fa').toUpperCase(), b = V('fb').toUpperCase();
+  const d = V('fd'), f = V('fc_');
+  if (!a||!b||!d||!f) { notify('⚠️ Remplissez les 4 champs du N° de lot', true); return; }
+  showLoader();
   const ds = new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}).replace(/\//g,'');
-  const num_lot = `${a1}-${a2}-${ds}-${String(f).padStart(3,'0')}`;
+  const num_lot = `${a}-${b}-${ds}-${String(f).padStart(3,'0')}`;
   const row = {
     num_lot, num_fiche: f,
-    fournisseur: document.getElementById('f-frs').value,
-    produit: document.getElementById('f-prod').value,
-    variete: document.getElementById('f-var').value,
-    origine: document.getElementById('f-orig').value,
-    date_reception: d,
-    heure_reception: document.getElementById('f-heure').value,
-    quantite: document.getElementById('f-qte').value || null,
-    conditionnement: document.getElementById('f-cond').value,
-    num_bl: document.getElementById('f-bl').value,
-    statut: document.getElementById('f-stat').value,
-    lien_fiche: document.getElementById('f-lien').value,
+    fournisseur: V('fFrs'), produit: V('fProd'), variete: V('fVar'), origine: V('fOrig'),
+    date_reception: d, heure_reception: V('fHeure'),
+    quantite: V('fQte')||null, conditionnement: V('fCond'),
+    num_bl: V('fBL'), statut: V('fStat'), lien_fiche: V('fLien'),
   };
   await db('POST','lots',row);
+  hideLoader();
   closeModal('addLot');
-  notify('✅ Lot enregistré avec succès !');
-  loadLots();
-  // reset
-  ['f-abrf','f-abrp','f-fiche','f-frs','f-prod','f-var','f-orig','f-heure','f-qte','f-bl','f-lien'].forEach(id => document.getElementById(id).value='');
+  notify(`✅ Lot ${num_lot} enregistré !`);
+  ['fa','fb','fc_','fFrs','fProd','fVar','fOrig','fHeure','fQte','fBL','fLien'].forEach(id => { if(G(id)) G(id).value=''; });
+  G('fStat').value = 'En attente';
+  await loadLots();
 }
 
-function showLot(id) {
-  const l = allLots.find(x=>x.id===id);
+async function delLot(id) {
+  if (!confirm('Supprimer ce lot définitivement ?')) return;
+  showLoader();
+  await db('DELETE','lots',null,`?id=eq.${id}`);
+  hideLoader();
+  notify('🗑 Lot supprimé');
+  await loadLots();
+}
+
+// ── LOT DETAIL ──────────────────────────────────────────
+async function showLot(id) {
+  const l = allLots.find(x => x.id === id);
   if (!l) return;
-  document.getElementById('lotDetailBody').innerHTML = `
-    <div class="lot-detail-banner">
-      <div>
-        <div class="lot-detail-num">${l.num_lot}</div>
-        <div class="lot-detail-sub">${l.produit||''} ${l.variete?'— '+l.variete:''} • ${badge(l.statut)}</div>
+  currentLotId = id;
+
+  // Load related data
+  const [qualite, production, pf, expedition, incidents] = await Promise.all([
+    db('GET','agreable_qualite',null,`?num_lot=eq.${encodeURIComponent(l.num_lot)}&order=created_at.desc`),
+    db('GET','suivi_production',null,`?num_lot=eq.${encodeURIComponent(l.num_lot)}&order=created_at.desc`),
+    db('GET','controle_pf',null,`?num_lot=eq.${encodeURIComponent(l.num_lot)}&order=created_at.desc`),
+    db('GET','expedition',null,`?num_lot=eq.${encodeURIComponent(l.num_lot)}&order=created_at.desc`),
+    db('GET','incidents',null,`?num_lot=eq.${encodeURIComponent(l.num_lot)}&order=created_at.desc`),
+  ]);
+
+  G('detailTitle').textContent = `📦 ${l.num_lot}`;
+  G('detailBody').innerHTML = `
+    <div class="lot-banner">
+      <div class="lot-banner-left">
+        <div class="lot-banner-num">${l.num_lot}</div>
+        <div>${badge(l.statut)}</div>
+        <div class="lot-banner-info">
+          ${l.fournisseur?`<span class="lot-banner-tag">🏭 ${l.fournisseur}</span>`:''}
+          ${l.produit?`<span class="lot-banner-tag">🥦 ${l.produit}${l.variete?' — '+l.variete:''}</span>`:''}
+          ${l.origine?`<span class="lot-banner-tag">📍 ${l.origine}</span>`:''}
+        </div>
       </div>
       <div id="qrBox"></div>
     </div>
-    <div class="detail-grid">
-      <div class="detail-item"><div class="detail-item-label">FOURNISSEUR</div><div class="detail-item-value">${l.fournisseur||'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">ORIGINE</div><div class="detail-item-value">${l.origine||'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">DATE RÉCEPTION</div><div class="detail-item-value">${l.date_reception||'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">HEURE</div><div class="detail-item-value">${l.heure_reception||'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">QUANTITÉ</div><div class="detail-item-value">${l.quantite?l.quantite+' kg/u':'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">CONDITIONNEMENT</div><div class="detail-item-value">${l.conditionnement||'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">N° BL</div><div class="detail-item-value">${l.num_bl||'—'}</div></div>
-      <div class="detail-item"><div class="detail-item-label">N° FICHE</div><div class="detail-item-value">${l.num_fiche||'—'}</div></div>
+
+    <div class="lot-detail-grid">
+      <div class="lot-detail-item"><div class="lot-detail-label">N° Fiche</div><div class="lot-detail-value">${l.num_fiche||'—'}</div></div>
+      <div class="lot-detail-item"><div class="lot-detail-label">Date Réception</div><div class="lot-detail-value">${fmt(l.date_reception)}</div></div>
+      <div class="lot-detail-item"><div class="lot-detail-label">Heure</div><div class="lot-detail-value">${l.heure_reception||'—'}</div></div>
+      <div class="lot-detail-item"><div class="lot-detail-label">Quantité</div><div class="lot-detail-value">${l.quantite?l.quantite+' kg/u':'—'}</div></div>
+      <div class="lot-detail-item"><div class="lot-detail-label">Conditionnement</div><div class="lot-detail-value">${l.conditionnement||'—'}</div></div>
+      <div class="lot-detail-item"><div class="lot-detail-label">N° BL</div><div class="lot-detail-value">${l.num_bl||'—'}</div></div>
     </div>
+
     ${l.lien_fiche
-      ? `<div class="fiche-btn-wrap"><a href="${l.lien_fiche}" target="_blank" class="btn btn-primary">📄 Voir la Fiche de Réception</a></div>`
+      ? `<div class="fiche-box"><div class="fiche-icon">📄</div><div class="fiche-text"><div class="fiche-title">Fiche d'Identification Produit</div><div class="fiche-sub">Cliquez pour voir la fiche de réception originale</div></div><a href="${l.lien_fiche}" target="_blank" class="btn btn-primary">Ouvrir la Fiche →</a></div>`
       : '<div class="no-fiche">📎 Aucune fiche attachée à ce lot</div>'
-    }`;
+    }
+
+    <div style="margin-top:24px">
+      <div class="lot-tabs">
+        <button class="lot-tab active" onclick="showLotSection('qualite',this)">✅ Qualité (${(qualite||[]).length})</button>
+        <button class="lot-tab" onclick="showLotSection('production',this)">⚙️ Production (${(production||[]).length})</button>
+        <button class="lot-tab" onclick="showLotSection('pf',this)">🔍 Contrôle PF (${(pf||[]).length})</button>
+        <button class="lot-tab" onclick="showLotSection('expedition',this)">🚚 Expédition (${(expedition||[]).length})</button>
+        <button class="lot-tab" onclick="showLotSection('incidents',this)">⚠️ Incidents (${(incidents||[]).length})</button>
+      </div>
+
+      ${renderLotSection('qualite', qualite||[], l.num_lot)}
+      ${renderLotSection('production', production||[], l.num_lot)}
+      ${renderLotSection('pf', pf||[], l.num_lot)}
+      ${renderLotSection('expedition', expedition||[], l.num_lot)}
+      ${renderLotSection('incidents', incidents||[], l.num_lot)}
+    </div>
+  `;
+
   setTimeout(() => {
-    try { new QRCode(document.getElementById('qrBox'), { text: l.num_lot, width:90, height:90, colorDark:'#1A4731', colorLight:'#ffffff' }); } catch(e){}
+    try { new QRCode(G('qrBox'),{text:l.num_lot,width:90,height:90,colorDark:'#1A4731',colorLight:'#D8F3DC'}); } catch(e){}
   }, 100);
+
   openModal('lotDetail');
 }
 
-// ── QUALITÉ ───────────────────────────
-async function loadQualite() {
-  try {
-    const data = await db('GET','agreable_qualite',null,'?order=created_at.desc');
-    const rows = Array.isArray(data) ? data : [];
-    const tbody = document.getElementById('qualiteBody');
-    if (!rows.length) { tbody.innerHTML = emptyRow(11,'✅','Aucun contrôle qualité'); return; }
-    tbody.innerHTML = rows.map(r => `<tr>
-      <td><span class="lot-chip">${r.num_lot||'—'}</span></td>
-      <td>${r.num_fiche||'—'}</td><td>${r.date_controle||'—'}</td><td>${r.controleur||'—'}</td>
-      <td>${badge(r.aspect_visuel)}</td><td>${badge(r.calibre)}</td><td>${badge(r.maturite)}</td>
-      <td>${r.taux_conformite?r.taux_conformite+'%':'—'}</td>
-      <td>${badge(r.decision)}</td><td>${r.observations||'—'}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="delRow('agreable_qualite',${r.id},loadQualite)">🗑</button></td>
-    </tr>`).join('');
-  } catch(e) { document.getElementById('qualiteBody').innerHTML = errRow(11); }
+function showLotSection(name, el) {
+  document.querySelectorAll('.lot-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.lot-section').forEach(s => s.classList.remove('active'));
+  G(`ls-${name}`).classList.add('active');
 }
 
-async function saveQualite() {
+function renderLotSection(name, data, numLot) {
+  const icons = {qualite:'✅',production:'⚙️',pf:'🔍',expedition:'🚚',incidents:'⚠️'};
+  const titles = {qualite:'Agréage Qualité',production:'Opérations de Production',pf:'Contrôle Produit Fini',expedition:'Expéditions',incidents:'Incidents'};
+
+  const addForms = {
+    qualite: `
+      <div class="inline-form">
+        <div class="inline-form-grid">
+          <div class="fg"><label>DATE CONTRÔLE</label><input class="fc" id="ls-q-date" type="date"></div>
+          <div class="fg"><label>CONTRÔLEUR</label><input class="fc" id="ls-q-ctrl" placeholder="Nom"></div>
+          <div class="fg"><label>ASPECT VISUEL</label>
+            <select class="fc" id="ls-q-asp"><option value="">—</option><option>Conforme</option><option>Non conforme</option><option>À vérifier</option></select></div>
+          <div class="fg"><label>CALIBRE</label>
+            <select class="fc" id="ls-q-cal"><option value="">—</option><option>Conforme</option><option>Non conforme</option><option>À vérifier</option></select></div>
+          <div class="fg"><label>MATURITÉ</label>
+            <select class="fc" id="ls-q-mat"><option value="">—</option><option>Conforme</option><option>Trop mûr</option><option>Pas assez mûr</option></select></div>
+          <div class="fg"><label>TAUX CONFORMITÉ (%)</label><input class="fc" id="ls-q-taux" type="number" min="0" max="100" placeholder="95"></div>
+          <div class="fg"><label>DÉCISION</label>
+            <select class="fc" id="ls-q-dec"><option value="">—</option><option>Accepté</option><option>Accepté sous réserve</option><option>Refusé</option></select></div>
+          <div class="fg"><label>OBSERVATIONS</label><input class="fc" id="ls-q-obs" placeholder="Remarques..."></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addQualite('${numLot}')">+ Ajouter ce contrôle</button>
+      </div>`,
+    production: `
+      <div class="inline-form">
+        <div class="inline-form-grid">
+          <div class="fg"><label>OPÉRATION</label>
+            <select class="fc" id="ls-p-op"><option value="">—</option><option>Triage</option><option>Reconditionnement</option><option>Stockage</option><option>Lavage</option><option>Calibrage</option><option>Emballage</option></select></div>
+          <div class="fg"><label>DATE & HEURE DÉBUT</label><input class="fc" id="ls-p-deb" type="datetime-local"></div>
+          <div class="fg"><label>DATE & HEURE FIN</label><input class="fc" id="ls-p-fin" type="datetime-local"></div>
+          <div class="fg"><label>QTÉ ENTRÉE (kg/u)</label><input class="fc" id="ls-p-in" type="number" placeholder="500"></div>
+          <div class="fg"><label>QTÉ SORTIE (kg/u)</label><input class="fc" id="ls-p-out" type="number" placeholder="480"></div>
+          <div class="fg"><label>RESPONSABLE</label><input class="fc" id="ls-p-resp" placeholder="Nom"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addProduction('${numLot}')">+ Ajouter cette opération</button>
+      </div>`,
+    pf: `
+      <div class="inline-form">
+        <div class="inline-form-grid">
+          <div class="fg"><label>DATE CONTRÔLE</label><input class="fc" id="ls-pf-date" type="date"></div>
+          <div class="fg"><label>CONTRÔLEUR</label><input class="fc" id="ls-pf-ctrl" placeholder="Nom"></div>
+          <div class="fg"><label>QTÉ CONTRÔLÉE</label><input class="fc" id="ls-pf-qc" type="number"></div>
+          <div class="fg"><label>QTÉ CONFORME</label><input class="fc" id="ls-pf-qf" type="number"></div>
+          <div class="fg"><label>RÉSULTAT</label>
+            <select class="fc" id="ls-pf-res"><option value="">—</option><option>Conforme</option><option>Non conforme</option></select></div>
+          <div class="fg"><label>LIBÉRATION</label>
+            <select class="fc" id="ls-pf-lib"><option value="">—</option><option>Libéré</option><option>Bloqué</option><option>En attente</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addPF('${numLot}')">+ Ajouter ce contrôle</button>
+      </div>`,
+    expedition: `
+      <div class="inline-form">
+        <div class="inline-form-grid">
+          <div class="fg"><label>DATE EXPÉDITION</label><input class="fc" id="ls-e-date" type="date"></div>
+          <div class="fg"><label>CLIENT</label><input class="fc" id="ls-e-cli" placeholder="Nom du client"></div>
+          <div class="fg"><label>DESTINATION</label><input class="fc" id="ls-e-dest" placeholder="Ville / Région"></div>
+          <div class="fg"><label>QTÉ EXPÉDIÉE</label><input class="fc" id="ls-e-qte" type="number"></div>
+          <div class="fg"><label>N° BL SORTIE</label><input class="fc" id="ls-e-bl" placeholder="BLS-2026-001"></div>
+          <div class="fg"><label>STATUT</label>
+            <select class="fc" id="ls-e-stat"><option value="">—</option><option>Livré</option><option>En transit</option><option>En attente</option><option>Annulé</option><option>Retour</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addExpedition('${numLot}')">+ Ajouter cette expédition</button>
+      </div>`,
+    incidents: `
+      <div class="inline-form">
+        <div class="inline-form-grid">
+          <div class="fg"><label>DATE</label><input class="fc" id="ls-i-date" type="date"></div>
+          <div class="fg"><label>TYPE</label>
+            <select class="fc" id="ls-i-type"><option value="">—</option><option>Retour client</option><option>Refus réception</option><option>Réclamation</option><option>Commande annulée</option><option>Non-conformité</option><option>Autre</option></select></div>
+          <div class="fg"><label>CONCERNÉ</label><input class="fc" id="ls-i-conc" placeholder="Client / Fournisseur"></div>
+          <div class="fg"><label>DESCRIPTION</label><input class="fc" id="ls-i-desc" placeholder="Description..."></div>
+          <div class="fg"><label>ACTION CORRECTIVE</label><input class="fc" id="ls-i-act" placeholder="Action prise..."></div>
+          <div class="fg"><label>STATUT</label>
+            <select class="fc" id="ls-i-stat"><option value="">—</option><option>Ouvert</option><option>En cours</option><option>Clôturé</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addIncident('${numLot}')">+ Ajouter cet incident</button>
+      </div>`
+  };
+
+  const renderItems = {
+    qualite: items => items.map(r => `
+      <div class="tl-item">
+        <div class="tl-dot">✅</div>
+        <div class="tl-content">
+          <div class="tl-title">${badge(r.decision)} — Conformité : ${r.taux_conformite||'—'}%</div>
+          <div class="tl-meta">
+            <span>📅 ${r.date_controle||'—'}</span>
+            <span>👤 ${r.controleur||'—'}</span>
+            <span>👁 ${r.aspect_visuel||'—'}</span>
+            <span>📏 ${r.calibre||'—'}</span>
+            <span>🍃 ${r.maturite||'—'}</span>
+          </div>
+          ${r.observations?`<div style="font-size:12px;color:var(--s500);margin-top:6px">💬 ${r.observations}</div>`:''}
+        </div>
+        <button class="tl-delete" onclick="delRecord('agreable_qualite',${r.id},'${numLot}')">🗑</button>
+      </div>`).join(''),
+    production: items => items.map(r => {
+      const dur = r.date_debut&&r.date_fin?((new Date(r.date_fin)-new Date(r.date_debut))/3600000).toFixed(1)+'h':'—';
+      const prt = r.qte_entree&&r.qte_sortie?(((r.qte_entree-r.qte_sortie)/r.qte_entree)*100).toFixed(1)+'%':'—';
+      return `<div class="tl-item">
+        <div class="tl-dot">⚙️</div>
+        <div class="tl-content">
+          <div class="tl-title">${r.operation||'—'} — <span style="color:var(--amber)">⏱ ${dur}</span> — Perte : <span style="color:var(--red)">${prt}</span></div>
+          <div class="tl-meta">
+            <span>📥 Entrée : ${r.qte_entree||'—'} kg/u</span>
+            <span>📤 Sortie : ${r.qte_sortie||'—'} kg/u</span>
+            <span>👤 ${r.responsable||'—'}</span>
+          </div>
+        </div>
+        <button class="tl-delete" onclick="delRecord('suivi_production',${r.id},'${numLot}')">🗑</button>
+      </div>`;
+    }).join(''),
+    pf: items => items.map(r => {
+      const ec = r.qte_controlee&&r.qte_conforme?(((r.qte_controlee-r.qte_conforme)/r.qte_controlee)*100).toFixed(1)+'%':'—';
+      return `<div class="tl-item">
+        <div class="tl-dot">🔍</div>
+        <div class="tl-content">
+          <div class="tl-title">${badge(r.resultat)} — ${badge(r.liberation)} — Écart : <span style="color:var(--red)">${ec}</span></div>
+          <div class="tl-meta">
+            <span>📅 ${r.date_controle||'—'}</span>
+            <span>👤 ${r.controleur||'—'}</span>
+            <span>✅ Conforme : ${r.qte_conforme||'—'} / ${r.qte_controlee||'—'}</span>
+          </div>
+        </div>
+        <button class="tl-delete" onclick="delRecord('controle_pf',${r.id},'${numLot}')">🗑</button>
+      </div>`;
+    }).join(''),
+    expedition: items => items.map(r => `
+      <div class="tl-item">
+        <div class="tl-dot">🚚</div>
+        <div class="tl-content">
+          <div class="tl-title">${r.client||'—'} → ${r.destination||'—'} ${badge(r.statut)}</div>
+          <div class="tl-meta">
+            <span>📅 ${r.date_expedition||'—'}</span>
+            <span>📦 ${r.qte_expediee||'—'} kg/u</span>
+            <span>📋 BL : ${r.num_bl_sortie||'—'}</span>
+            <span>🚛 ${r.transporteur||'—'}</span>
+          </div>
+        </div>
+        <button class="tl-delete" onclick="delRecord('expedition',${r.id},'${numLot}')">🗑</button>
+      </div>`).join(''),
+    incidents: items => items.map(r => `
+      <div class="tl-item">
+        <div class="tl-dot">⚠️</div>
+        <div class="tl-content">
+          <div class="tl-title">${r.type_incident||'—'} ${badge(r.statut)}</div>
+          <div class="tl-meta">
+            <span>📅 ${r.date_incident||'—'}</span>
+            <span>👤 ${r.concerne||'—'}</span>
+          </div>
+          ${r.description?`<div style="font-size:12px;color:var(--s600);margin-top:6px">📝 ${r.description}</div>`:''}
+          ${r.action_corrective?`<div style="font-size:12px;color:var(--g3);margin-top:4px">✅ Action : ${r.action_corrective}</div>`:''}
+        </div>
+        <button class="tl-delete" onclick="delRecord('incidents',${r.id},'${numLot}')">🗑</button>
+      </div>`).join('')
+  };
+
+  const items = data;
+  return `<div class="lot-section ${name==='qualite'?'active':''}" id="ls-${name}">
+    ${addForms[name]}
+    <div class="timeline">
+      ${items.length ? renderItems[name](items) : `<div class="empty" style="padding:32px"><div class="empty-icon" style="font-size:36px">${icons[name]}</div><div class="empty-title">Aucun enregistrement</div></div>`}
+    </div>
+  </div>`;
+}
+
+// ── ADD RECORDS ─────────────────────────────────────────
+async function addQualite(numLot) {
   await db('POST','agreable_qualite',{
-    num_lot: v('q-lot'), num_fiche: v('q-fiche'), date_controle: v('q-date'),
-    controleur: v('q-ctrl'), aspect_visuel: v('q-asp'), calibre: v('q-cal'),
-    maturite: v('q-mat'), taux_conformite: v('q-taux')||null,
-    decision: v('q-dec'), observations: v('q-obs')
+    num_lot:numLot, date_controle:V('ls-q-date'), controleur:V('ls-q-ctrl'),
+    aspect_visuel:V('ls-q-asp'), calibre:V('ls-q-cal'), maturite:V('ls-q-mat'),
+    taux_conformite:V('ls-q-taux')||null, decision:V('ls-q-dec'), observations:V('ls-q-obs')
   });
-  closeModal('addQualite'); notify('✅ Contrôle enregistré !'); loadQualite();
+  notify('✅ Contrôle qualité ajouté !'); refreshLotDetail();
 }
 
-// ── PRODUCTION ────────────────────────
-async function loadProduction() {
-  try {
-    const data = await db('GET','suivi_production',null,'?order=created_at.desc');
-    const rows = Array.isArray(data) ? data : [];
-    const tbody = document.getElementById('productionBody');
-    if (!rows.length) { tbody.innerHTML = emptyRow(11,'⚙️','Aucune opération enregistrée'); return; }
-    tbody.innerHTML = rows.map(r => {
-      const dur = r.date_debut&&r.date_fin ? ((new Date(r.date_fin)-new Date(r.date_debut))/3600000).toFixed(1)+'h' : '—';
-      const prt = r.qte_entree&&r.qte_sortie ? (((r.qte_entree-r.qte_sortie)/r.qte_entree)*100).toFixed(1)+'%' : '—';
-      return `<tr>
-        <td><span class="lot-chip">${r.num_lot||'—'}</span></td>
-        <td>${r.operation||'—'}</td><td>${r.date_debut||'—'}</td><td>${r.date_fin||'—'}</td>
-        <td><span class="badge badge-yellow">${dur}</span></td>
-        <td>${r.qte_entree||'—'}</td><td>${r.qte_sortie||'—'}</td>
-        <td><span class="badge badge-red">${prt}</span></td>
-        <td>${r.responsable||'—'}</td><td>${r.observations||'—'}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="delRow('suivi_production',${r.id},loadProduction)">🗑</button></td>
-      </tr>`;
-    }).join('');
-  } catch(e) { document.getElementById('productionBody').innerHTML = errRow(11); }
-}
-
-async function saveProduction() {
+async function addProduction(numLot) {
   await db('POST','suivi_production',{
-    num_lot: v('p-lot'), operation: v('p-op'),
-    date_debut: v('p-deb')||null, date_fin: v('p-fin')||null,
-    qte_entree: v('p-in')||null, qte_sortie: v('p-out')||null,
-    responsable: v('p-resp'), observations: v('p-obs')
+    num_lot:numLot, operation:V('ls-p-op'),
+    date_debut:V('ls-p-deb')||null, date_fin:V('ls-p-fin')||null,
+    qte_entree:V('ls-p-in')||null, qte_sortie:V('ls-p-out')||null, responsable:V('ls-p-resp')
   });
-  closeModal('addProduction'); notify('✅ Opération enregistrée !'); loadProduction();
+  notify('✅ Opération ajoutée !'); refreshLotDetail();
 }
 
-// ── PF ────────────────────────────────
-async function loadPF() {
-  try {
-    const data = await db('GET','controle_pf',null,'?order=created_at.desc');
-    const rows = Array.isArray(data) ? data : [];
-    const tbody = document.getElementById('pfBody');
-    if (!rows.length) { tbody.innerHTML = emptyRow(10,'🔍','Aucun contrôle PF'); return; }
-    tbody.innerHTML = rows.map(r => {
-      const ec = r.qte_controlee&&r.qte_conforme ? (((r.qte_controlee-r.qte_conforme)/r.qte_controlee)*100).toFixed(1)+'%' : '—';
-      return `<tr>
-        <td><span class="lot-chip">${r.num_lot||'—'}</span></td>
-        <td>${r.date_controle||'—'}</td><td>${r.controleur||'—'}</td>
-        <td>${r.qte_controlee||'—'}</td><td>${r.qte_conforme||'—'}</td>
-        <td><span class="badge badge-red">${ec}</span></td>
-        <td>${badge(r.resultat)}</td><td>${badge(r.liberation)}</td>
-        <td>${r.observations||'—'}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="delRow('controle_pf',${r.id},loadPF)">🗑</button></td>
-      </tr>`;
-    }).join('');
-  } catch(e) { document.getElementById('pfBody').innerHTML = errRow(10); }
-}
-
-async function savePF() {
+async function addPF(numLot) {
   await db('POST','controle_pf',{
-    num_lot: v('pf-lot'), date_controle: v('pf-date'), controleur: v('pf-ctrl'),
-    qte_controlee: v('pf-qc')||null, qte_conforme: v('pf-qf')||null,
-    resultat: v('pf-res'), liberation: v('pf-lib'), observations: v('pf-obs')
+    num_lot:numLot, date_controle:V('ls-pf-date'), controleur:V('ls-pf-ctrl'),
+    qte_controlee:V('ls-pf-qc')||null, qte_conforme:V('ls-pf-qf')||null,
+    resultat:V('ls-pf-res'), liberation:V('ls-pf-lib')
   });
-  closeModal('addPF'); notify('✅ Contrôle PF enregistré !'); loadPF();
+  notify('✅ Contrôle PF ajouté !'); refreshLotDetail();
 }
 
-// ── EXPÉDITION ────────────────────────
-async function loadExpedition() {
-  try {
-    const data = await db('GET','expedition',null,'?order=created_at.desc');
-    const rows = Array.isArray(data) ? data : [];
-    const tbody = document.getElementById('expeditionBody');
-    if (!rows.length) { tbody.innerHTML = emptyRow(10,'🚚','Aucune expédition enregistrée'); return; }
-    tbody.innerHTML = rows.map(r => `<tr>
-      <td><span class="lot-chip">${r.num_lot||'—'}</span></td>
-      <td>${r.date_expedition||'—'}</td><td>${r.client||'—'}</td><td>${r.destination||'—'}</td>
-      <td>${r.qte_expediee||'—'}</td><td>${r.num_bl_sortie||'—'}</td><td>${r.transporteur||'—'}</td>
-      <td>${badge(r.statut)}</td><td>${r.observations||'—'}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="delRow('expedition',${r.id},loadExpedition)">🗑</button></td>
-    </tr>`).join('');
-  } catch(e) { document.getElementById('expeditionBody').innerHTML = errRow(10); }
-}
-
-async function saveExpedition() {
+async function addExpedition(numLot) {
   await db('POST','expedition',{
-    num_lot: v('e-lot'), date_expedition: v('e-date'), client: v('e-cli'),
-    destination: v('e-dest'), qte_expediee: v('e-qte')||null,
-    num_bl_sortie: v('e-bl'), transporteur: v('e-trans'),
-    statut: v('e-stat'), observations: v('e-obs')
+    num_lot:numLot, date_expedition:V('ls-e-date'), client:V('ls-e-cli'),
+    destination:V('ls-e-dest'), qte_expediee:V('ls-e-qte')||null,
+    num_bl_sortie:V('ls-e-bl'), statut:V('ls-e-stat')
   });
-  closeModal('addExpedition'); notify('✅ Expédition enregistrée !'); loadExpedition();
+  notify('✅ Expédition ajoutée !'); refreshLotDetail();
 }
 
-// ── INCIDENTS ─────────────────────────
-async function loadIncidents() {
-  try {
-    const data = await db('GET','incidents',null,'?order=created_at.desc');
-    const rows = Array.isArray(data) ? data : [];
-    const tbody = document.getElementById('incidentsBody');
-    if (!rows.length) { tbody.innerHTML = emptyRow(9,'⚠️','Aucun incident enregistré'); return; }
-    tbody.innerHTML = rows.map(r => `<tr>
-      <td><span class="lot-chip">${r.num_lot||'—'}</span></td>
-      <td>${r.date_incident||'—'}</td><td>${r.type_incident||'—'}</td>
-      <td>${r.description||'—'}</td><td>${r.concerne||'—'}</td>
-      <td>${r.action_corrective||'—'}</td><td>${r.responsable||'—'}</td>
-      <td>${badge(r.statut)}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="delRow('incidents',${r.id},loadIncidents)">🗑</button></td>
-    </tr>`).join('');
-  } catch(e) { document.getElementById('incidentsBody').innerHTML = errRow(9); }
-}
-
-async function saveIncident() {
+async function addIncident(numLot) {
   await db('POST','incidents',{
-    num_lot: v('i-lot'), date_incident: v('i-date'), type_incident: v('i-type'),
-    description: v('i-desc'), concerne: v('i-conc'),
-    action_corrective: v('i-act'), responsable: v('i-resp'), statut: v('i-stat')
+    num_lot:numLot, date_incident:V('ls-i-date'), type_incident:V('ls-i-type'),
+    description:V('ls-i-desc'), concerne:V('ls-i-conc'),
+    action_corrective:V('ls-i-act'), statut:V('ls-i-stat')
   });
-  closeModal('addIncident'); notify('✅ Incident enregistré !'); loadIncidents();
+  notify('✅ Incident ajouté !'); refreshLotDetail();
 }
 
-// ── DELETE ────────────────────────────
-async function delRow(table, id, reload) {
-  if (!confirm('Supprimer cet enregistrement ?')) return;
-  await db('DELETE', table, null, `?id=eq.${id}`);
-  notify('🗑 Supprimé'); reload();
+async function delRecord(table, id, numLot) {
+  if (!confirm('Supprimer ?')) return;
+  await db('DELETE',table,null,`?id=eq.${id}`);
+  notify('🗑 Supprimé'); refreshLotDetail();
 }
 
-// ── HELPERS ───────────────────────────
-const v = id => document.getElementById(id).value;
-const emptyRow = (cols, icon, msg) => `<tr><td colspan="${cols}"><div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${msg}</div></div></td></tr>`;
-const errRow = (cols) => `<tr><td colspan="${cols}"><div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur de chargement</div><div class="empty-sub">Vérifiez la connexion Supabase</div></div></td></tr>`;
+async function refreshLotDetail() {
+  if (currentLotId) await showLot(currentLotId);
+}
+
+// ── STATS ────────────────────────────────────────────────
+function renderStats() {
+  const lots = allLots;
+  if (!lots.length) {
+    ['stat-statuts','stat-fournisseurs','stat-produits','stat-semaine'].forEach(id => {
+      G(id).innerHTML = '<div style="color:var(--s400);font-size:13px;text-align:center;padding:20px">Aucune donnée</div>';
+    });
+    return;
+  }
+
+  // Statuts
+  const statuts = {};
+  lots.forEach(l => { statuts[l.statut||'Inconnu'] = (statuts[l.statut||'Inconnu']||0)+1; });
+  G('stat-statuts').innerHTML = Object.entries(statuts).sort((a,b)=>b[1]-a[1]).map(([k,v]) =>
+    `<div class="stats-row-item"><span class="stats-row-label">${badge(k)} ${k}</span><span class="stats-row-val">${v}</span></div>
+     <div class="progress-bar"><div class="progress-fill" style="width:${(v/lots.length*100).toFixed(0)}%"></div></div>`
+  ).join('');
+
+  // Fournisseurs
+  const frs = {};
+  lots.forEach(l => { if(l.fournisseur) frs[l.fournisseur] = (frs[l.fournisseur]||0)+1; });
+  G('stat-fournisseurs').innerHTML = Object.entries(frs).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v]) =>
+    `<div class="stats-row-item"><span class="stats-row-label">🏭 ${k}</span><span class="stats-row-val">${v} lot${v>1?'s':''}</span></div>`
+  ).join('') || '<div style="color:var(--s400);font-size:13px;padding:16px">Aucune donnée</div>';
+
+  // Produits
+  const prods = {};
+  lots.forEach(l => { if(l.produit) prods[l.produit] = (prods[l.produit]||0)+1; });
+  G('stat-produits').innerHTML = Object.entries(prods).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v]) =>
+    `<div class="stats-row-item"><span class="stats-row-label">🥦 ${k}</span><span class="stats-row-val">${v} lot${v>1?'s':''}</span></div>`
+  ).join('') || '<div style="color:var(--s400);font-size:13px;padding:16px">Aucune donnée</div>';
+
+  // Cette semaine
+  const now = new Date();
+  const weekStart = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+  weekStart.setHours(0,0,0,0);
+  const thisWeek = lots.filter(l => l.date_reception && new Date(l.date_reception) >= weekStart);
+  const qte = thisWeek.reduce((s,l) => s + (parseFloat(l.quantite)||0), 0);
+  G('stat-semaine').innerHTML = `
+    <div class="stats-row-item"><span class="stats-row-label">📦 Lots reçus</span><span class="stats-row-val">${thisWeek.length}</span></div>
+    <div class="stats-row-item"><span class="stats-row-label">⚖️ Quantité totale</span><span class="stats-row-val">${qte.toLocaleString('fr-FR')} kg/u</span></div>
+    <div class="stats-row-item"><span class="stats-row-label">🏆 Fournisseurs</span><span class="stats-row-val">${new Set(thisWeek.map(l=>l.fournisseur).filter(Boolean)).size}</span></div>
+    <div class="stats-row-item"><span class="stats-row-label">✅ Acceptés</span><span class="stats-row-val">${thisWeek.filter(l=>l.statut==='En cours'||l.statut==='Expédié').length}</span></div>
+  `;
+}
 </script>
 </body>
 </html>
-
