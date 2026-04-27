@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --g1:#0A1F11;--g2:#1A4731;--g3:#2D6A4F;--g4:#52B788;--g5:#95D5B2;--g6:#D8F3DC;--g7:#F0FAF2;--g8:#E8F5E9;
@@ -347,56 +346,6 @@ textarea.fc{resize:vertical;min-height:70px}
 .spin{width:44px;height:44px;border:4px solid var(--g6);border-top-color:var(--g3);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-
-/* PHOTO UPLOAD */
-.photo-zone{border:2px dashed var(--g5);border-radius:var(--r12);padding:24px;text-align:center;background:var(--g7);transition:var(--tr);cursor:pointer}
-.photo-zone:hover{border-color:var(--g3);background:var(--g6)}
-.photo-zone.has-photo{padding:0;border:none;background:transparent}
-.photo-preview{width:100%;max-height:200px;object-fit:cover;border-radius:var(--r12);display:block}
-.photo-actions{display:flex;gap:8px;margin-top:8px;justify-content:center}
-.photo-icon{font-size:32px;color:var(--g4);margin-bottom:8px}
-.photo-text{font-size:13px;color:var(--g3);font-weight:600}
-.photo-hint{font-size:11px;color:var(--s400);margin-top:4px}
-input[type="file"]{display:none}
-.photo-thumb{width:48px;height:48px;border-radius:var(--r8);object-fit:cover;border:2px solid var(--g6);cursor:pointer;transition:var(--tr)}
-.photo-thumb:hover{transform:scale(1.1);border-color:var(--g4)}
-
-/* PHOTO MODAL */
-.photo-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center;padding:20px;cursor:pointer}
-.photo-modal.open{display:flex}
-.photo-modal img{max-width:90%;max-height:90vh;border-radius:var(--r12);box-shadow:var(--sh4)}
-.photo-modal-close{position:absolute;top:20px;right:20px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:white;font-size:20px;backdrop-filter:blur(8px)}
-
-/* PERTE BADGE */
-.perte-low{color:var(--g3);font-weight:700}
-.perte-med{color:var(--amb);font-weight:700}
-.perte-high{color:var(--red);font-weight:700}
-
-/* FOURNISSEUR CARD */
-.frs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-.frs-card{background:white;border-radius:var(--r16);padding:20px;box-shadow:var(--sh1);border:1px solid var(--s100);transition:var(--tr)}
-.frs-card:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:var(--g5)}
-.frs-name{font-size:15px;font-weight:800;color:var(--g2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.frs-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.frs-stat{background:var(--g7);padding:10px 12px;border-radius:var(--r8);text-align:center}
-.frs-stat-n{font-size:20px;font-weight:900;color:var(--g2);line-height:1}
-.frs-stat-l{font-size:10px;font-weight:700;color:var(--s500);letter-spacing:.4px;text-transform:uppercase;margin-top:3px}
-.frs-conform{display:flex;align-items:center;gap:8px;margin-top:10px}
-.frs-conform-bar{flex:1;height:8px;background:var(--s100);border-radius:4px;overflow:hidden}
-.frs-conform-fill{height:100%;border-radius:4px;transition:width .8s ease}
-.frs-conform-val{font-size:12px;font-weight:800}
-
-/* PERTES SECTION */
-.pertes-card{background:white;border-radius:var(--r16);padding:24px;box-shadow:var(--sh1);border:1px solid var(--s100)}
-.pertes-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--s100)}
-.pertes-row:last-child{border-bottom:none;padding-top:14px;border-top:2px solid var(--g5);font-weight:700}
-.pertes-stage{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--s700);font-weight:600}
-.pertes-icon{width:32px;height:32px;border-radius:50%;background:var(--g6);display:flex;align-items:center;justify-content:center;font-size:14px}
-.pertes-val{font-size:14px;font-weight:700}
-.pertes-val.danger{color:var(--red)}
-.pertes-val.warn{color:var(--amb)}
-.pertes-val.ok{color:var(--g3)}
-
 @media(max-width:1100px){.sg{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:800px){
   .hdr{padding:0 16px;height:60px}
@@ -494,8 +443,6 @@ input[type="file"]{display:none}
       <button class="ntab active" id="tab-dash" onclick="goView('dash')">📊 Tableau de Bord</button>
       <button class="ntab" id="tab-lots" onclick="goView('lots')">📦 Registre des Lots <span class="ntab-cnt" id="nCnt">0</span></button>
       <button class="ntab" id="tab-stats" onclick="goView('stats')">📈 Statistiques</button>
-      <button class="ntab" id="tab-frs" onclick="goView('frs')">🏭 Fournisseurs</button>
-      <button class="ntab" id="tab-pertes" onclick="goView('pertes')">📉 Pertes</button>
       <button class="ntab" id="tab-hist" onclick="goView('hist')">📜 Historique</button>
       <button class="ntab" id="nAlerts" onclick="goView('alerts')" style="display:none">🚨 Alertes <span class="ntab-cnt red" id="aCnt">0</span></button>
     </div>
@@ -567,32 +514,6 @@ input[type="file"]{display:none}
           <div><div class="ct">📜 Historique des Actions</div><div class="cs">Toutes les modifications enregistrées dans le système</div></div>
         </div>
         <div id="histBody" style="padding:8px 16px"><div class="empty"><div class="ei">📜</div><div class="et">Chargement...</div></div></div>
-      </div>
-    </div>
-
-    <!-- FOURNISSEURS -->
-    <div class="view" id="view-frs">
-      <div class="card">
-        <div class="ch">
-          <div><div class="ct">🏭 Performance par Fournisseur</div><div class="cs">Analyse détaillée de chaque fournisseur</div></div>
-        </div>
-        <div style="padding:20px"><div class="frs-grid" id="frsGrid"></div></div>
-      </div>
-    </div>
-
-    <!-- PERTES -->
-    <div class="view" id="view-pertes">
-      <div class="sg" style="grid-template-columns:repeat(4,1fr)">
-        <div class="sc g"><div class="sc-ico">📥</div><div class="sc-num" id="pTot">—</div><div class="sc-lbl">Reçu Total (kg)</div></div>
-        <div class="sc b"><div class="sc-ico">⚖️</div><div class="sc-num" id="pPes">—</div><div class="sc-lbl">Pesé Réel (kg)</div></div>
-        <div class="sc a"><div class="sc-ico">⚙️</div><div class="sc-num" id="pProd">—</div><div class="sc-lbl">Perte Production (kg)</div></div>
-        <div class="sc r"><div class="sc-ico">📉</div><div class="sc-num" id="pTotal">—</div><div class="sc-lbl">% Pertes Totales</div></div>
-      </div>
-      <div class="card">
-        <div class="ch">
-          <div><div class="ct">📉 Analyse des Pertes</div><div class="cs">Suivi des pertes à chaque étape du processus</div></div>
-        </div>
-        <div style="padding:24px"><div class="pertes-card" id="pertesDetail"></div></div>
       </div>
     </div>
 
@@ -685,22 +606,9 @@ input[type="file"]{display:none}
       <div class="fg"><label>SIGNATURE FOURNISSEUR</label><input class="fc" id="fSign" placeholder="Nom du signataire"></div>
     </div>
 
-    <div class="ms">📸 Photo du Lot</div>
-    <div class="fg2">
-      <div class="fg full">
-        <label>PHOTO DU PRODUIT (optionnel)</label>
-        <div class="photo-zone" id="photoZone" onclick="document.getElementById('fPhoto').click()">
-          <div class="photo-icon">📸</div>
-          <div class="photo-text">Cliquer pour prendre une photo</div>
-          <div class="photo-hint">JPG, PNG · Max 5 MB · Photo du carton ou du produit</div>
-        </div>
-        <input type="file" id="fPhoto" accept="image/*" capture="environment" onchange="onPhotoSelect(event)">
-      </div>
-    </div>
-
     <div class="ms">🔗 Documents</div>
     <div class="fg2">
-      <div class="fg full"><label>LIEN FICHE GOOGLE DRIVE (optionnel) — Pour QR code alternatif</label><input class="fc" id="fLien" placeholder="https://drive.google.com/..."></div>
+      <div class="fg full"><label>LIEN FICHE GOOGLE DRIVE — Pour le QR code client</label><input class="fc" id="fLien" placeholder="https://drive.google.com/..."></div>
     </div>
 
     <div class="fa">
@@ -738,7 +646,6 @@ const ROLES={
 };
 
 let lots=[],curF='all',curLot=null,curRole='reception';
-let pendingPhotoFile=null;
 const can=k=>ROLES[curRole]?.perms[k]||false;
 
 // ── UTILS ──────────────────────────────
@@ -751,31 +658,14 @@ const fmtDT=d=>{if(!d)return'—';try{return new Date(d).toLocaleString('fr-FR',
 // ── DB ─────────────────────────────────
 async function db(method,table,body,filter=''){
   try{
-    // Cache-busting on GET requests
-    const url=method==='GET'?`${SB}/rest/v1/${table}${filter}${filter.includes('?')?'&':'?'}_t=${Date.now()}`:`${SB}/rest/v1/${table}${filter}`;
-    const res=await fetch(url,{
+    const res=await fetch(`${SB}/rest/v1/${table}${filter}`,{
       method,
-      cache:'no-store',
-      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':'return=minimal','Cache-Control':'no-cache'},
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':'return=minimal'},
       body:body?JSON.stringify(body):null
     });
-    if(method==='GET'){
-      if(!res.ok){console.error('GET error:',table,res.status);return[]}
-      const data=await res.json();
-      console.log('[DB GET]',table,'→',Array.isArray(data)?data.length:'?','rows');
-      return data;
-    }
-    if(!res.ok){
-      const errText=await res.text();
-      console.error('[DB '+method+'] error:',errText);
-      notify('❌ Erreur: '+(errText.substring(0,100)),'err');
-    }
+    if(method==='GET')return res.ok?res.json():[];
     return res;
-  }catch(e){
-    console.error('[DB] exception:',e);
-    notify('❌ Erreur de connexion','err');
-    return method==='GET'?[]:null;
-  }
+  }catch(e){notify('❌ Erreur de connexion','err');return[]}
 }
 
 async function logHist(action,numLot,details=''){
@@ -830,8 +720,6 @@ function applyPerms(){
   G('lotsActions').innerHTML=search+(can('export')?exports:'')+(can('createLot')?newBtn:'');
 
   G('tab-stats').style.display=can('viewStats')?'flex':'none';
-  G('tab-frs').style.display=can('viewStats')?'flex':'none';
-  G('tab-pertes').style.display=can('viewStats')?'flex':'none';
   G('tab-hist').style.display=can('viewHist')?'flex':'none';
 }
 
@@ -880,55 +768,6 @@ function barChart(data,max){
   return data.map(([k,v])=>`<div class="cbr"><div class="cbl" title="${k}">${k}</div><div class="cbt"><div class="cbf" style="width:${max?((v/max)*100).toFixed(0):0}%"></div></div><div class="cbv">${v}</div></div>`).join('');
 }
 
-// ── PHOTO ──────────────────────────────
-function onPhotoSelect(e){
-  const file=e.target.files[0];
-  if(!file)return;
-  if(file.size>5*1024*1024){notify('⚠️ Photo trop grande (max 5 MB)','w');e.target.value='';return}
-  pendingPhotoFile=file;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const z=G('photoZone');
-    z.classList.add('has-photo');
-    z.innerHTML=`<img src="${ev.target.result}" class="photo-preview"><div class="photo-actions"><button type="button" class="btn btn-d btn-sm" onclick="event.stopPropagation();removePhoto()">🗑 Retirer</button></div>`;
-  };
-  reader.readAsDataURL(file);
-}
-function removePhoto(){
-  pendingPhotoFile=null;
-  G('fPhoto').value='';
-  const z=G('photoZone');
-  z.classList.remove('has-photo');
-  z.innerHTML=`<div class="photo-icon">📸</div><div class="photo-text">Cliquer pour prendre une photo</div><div class="photo-hint">JPG, PNG · Max 5 MB · Photo du carton ou du produit</div>`;
-}
-async function uploadPhoto(file,numLot){
-  if(!file)return null;
-  try{
-    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
-    const safeName=numLot.replace(/[^A-Za-z0-9-]/g,'_');
-    const path=`${safeName}_${Date.now()}.${ext}`;
-    const res=await fetch(`${SB}/storage/v1/object/photos/${path}`,{
-      method:'POST',
-      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':file.type||'image/jpeg'},
-      body:file
-    });
-    if(!res.ok){notify('⚠️ Photo non envoyée — vérifiez le bucket Supabase','w');return null}
-    return `${SB}/storage/v1/object/public/photos/${path}`;
-  }catch(e){return null}
-}
-function viewPhoto(url){
-  let m=G('photoModal');
-  if(!m){
-    m=document.createElement('div');
-    m.id='photoModal';m.className='photo-modal';
-    m.innerHTML=`<button class="photo-modal-close" onclick="this.parentElement.classList.remove('open')">✕</button><img id="photoModalImg">`;
-    m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
-    document.body.appendChild(m);
-  }
-  G('photoModalImg').src=url;
-  m.classList.add('open');
-}
-
 // ── INIT ───────────────────────────────
 async function init(){
   await loadLots();
@@ -936,12 +775,10 @@ async function init(){
 }
 
 // ── VIEWS ──────────────────────────────
-const VIEWS=['dash','lots','stats','frs','pertes','hist','alerts'];
+const VIEWS=['dash','lots','stats','hist','alerts'];
 function goView(v){
-  if(v==='stats'&&!can('viewStats')){notify('🔒 Accès réservé','w');return}
+  if(v==='stats'&&!can('viewStats')){notify('🔒 Accès réservé au Responsable','w');return}
   if(v==='hist'&&!can('viewHist')){notify('🔒 Accès réservé au Responsable','w');return}
-  if(v==='frs'&&!can('viewStats')){notify('🔒 Accès réservé','w');return}
-  if(v==='pertes'&&!can('viewStats')){notify('🔒 Accès réservé','w');return}
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
   G(`tab-${v}`)?.classList.add('active');
   if(v==='alerts')G('nAlerts').classList.add('active');
@@ -950,8 +787,6 @@ function goView(v){
   if(v==='stats')renderStats();
   if(v==='alerts')renderAlerts();
   if(v==='hist')renderHist();
-  if(v==='frs')renderFrs();
-  if(v==='pertes')renderPertes();
 }
 
 // ── MODALS ─────────────────────────────
@@ -1060,10 +895,6 @@ async function saveLot(){
   const num_lot=`${a}-${b}-${ds}-${String(f).padStart(3,'0')}`;
   if(lots.find(l=>l.num_lot===num_lot)){notify('⚠️ Ce N° de lot existe déjà','err');return}
   showLoad();
-  let photoUrl=null;
-  if(pendingPhotoFile){
-    photoUrl=await uploadPhoto(pendingPhotoFile,num_lot);
-  }
   await db('POST','lots',{
     num_lot,num_fiche:f,
     fournisseur:V('fFrs'),produit:V('fProd'),variete:V('fVar'),origine:V('fOrig'),
@@ -1072,19 +903,14 @@ async function saveLot(){
     quantite:V('fQ')||null,quantite_pesee:V('fQP')||null,
     conditionnement:V('fCond'),temperature_stockage:V('fTemp')||null,
     statut:V('fStat'),lien_fiche:V('fLien'),
-    num_chauffeur:V('fChauf'),matricule_camion:V('fMat'),signature_fournisseur:V('fSign'),
-    photo_url:photoUrl
+    num_chauffeur:V('fChauf'),matricule_camion:V('fMat'),signature_fournisseur:V('fSign')
   });
   await logHist('Création lot',num_lot,`Fournisseur: ${V('fFrs')} · Produit: ${V('fProd')}`);
   hideLoad();closeModal('addLot');
   notify(`✅ Lot ${num_lot} enregistré !`);
   ['fa','fb','fFrs','fProd','fVar','fOrig','fMar','fH','fQ','fQP','fLien','fDLC','fTemp','fChauf','fMat','fSign'].forEach(id=>{if(G(id))G(id).value=''});
-  removePhoto();
   G('fStat').value='En attente';G('fCat').value='';G('fCond').value='';G('fCal').value='';
-  // Small delay to ensure Supabase has committed
-  await new Promise(r=>setTimeout(r,400));
-  await loadLots();
-  checkAlerts();
+  await loadLots();checkAlerts();
 }
 
 async function delLot(id,numLot){
@@ -1153,8 +979,6 @@ async function showLot(id){
       <div class="qrw"><div id="qrBox"></div><div class="qrs">Scanner → Fiche client</div></div>
     </div>
 
-    ${l.photo_url?`<div style="margin-bottom:18px"><div class="liil" style="margin-bottom:8px">📸 PHOTO DU LOT</div><img src="${l.photo_url}" onclick="viewPhoto('${l.photo_url}')" style="max-width:280px;border-radius:var(--r12);border:2px solid var(--g6);cursor:pointer;display:block;box-shadow:var(--sh1)"></div>`:''}
-
     <div class="lig">
       <div class="lii"><div class="liil">N° Fiche</div><div class="liiv">${l.num_fiche||'—'}</div></div>
       <div class="lii"><div class="liil">Date Réception</div><div class="liiv">${fmt(l.date_reception)}</div></div>
@@ -1177,7 +1001,6 @@ async function showLot(id){
         :'<div class="nofiche" style="flex:1">📎 Aucune fiche Google Drive attachée</div>'
       }
       <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-p" onclick="generateFichePDF(${l.id})">📄 Générer Fiche PDF</button>
         <button class="btn btn-a" onclick="printQR('${l.num_lot}','${l.lien_fiche||''}')">🖨️ Imprimer QR</button>
         <button class="btn btn-g" onclick="showClientPage(${l.id})">👁 Vue Client</button>
       </div>
@@ -1464,279 +1287,6 @@ function exportPDF(){
   win.document.close();
   logHist('Export PDF','');
   notify('📄 Export PDF en cours !');
-}
-
-// ── GÉNÉRATION FICHE PDF AUTO ──────────
-function generateFichePDF(id){
-  const l=lots.find(x=>x.id===id);if(!l)return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  // Header
-  doc.setFillColor(26,71,49);
-  doc.rect(0,0,210,30,'F');
-  doc.setFillColor(82,183,136);
-  doc.rect(0,30,210,1.5,'F');
-
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(18);
-  doc.text('QUALI-FLEG',14,15);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','normal');
-  doc.text("FICHE D'IDENTIFICATION PRODUIT",14,22);
-
-  // N° fiche box
-  doc.setDrawColor(26,71,49);
-  doc.setLineWidth(0.5);
-  doc.setFillColor(216,243,220);
-  doc.rect(14,38,182,12,'FD');
-  doc.setTextColor(26,71,49);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(9);
-  doc.text("N° DE FICHE",18,46);
-  doc.setFontSize(13);
-  doc.text(String(l.num_fiche||'—'),60,47);
-  doc.setFontSize(9);
-  doc.text("N° DE LOT",100,46);
-  doc.setFont('courier','bold');
-  doc.setFontSize(11);
-  doc.text(l.num_lot||'—',135,47);
-
-  let y=58;
-
-  // Section helper
-  const section=(title)=>{
-    doc.setFillColor(45,106,79);
-    doc.rect(14,y,182,7,'F');
-    doc.setTextColor(255,255,255);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(9);
-    doc.text(title,17,y+5);
-    y+=10;
-  };
-  const field=(label,value,x,w)=>{
-    doc.setDrawColor(204,204,204);
-    doc.setFillColor(245,245,245);
-    doc.rect(x,y,w,5,'FD');
-    doc.setTextColor(45,106,79);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(7);
-    doc.text(label,x+2,y+3.5);
-    doc.setFillColor(255,255,255);
-    doc.rect(x,y+5,w,9,'FD');
-    doc.setTextColor(33,33,33);
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(10);
-    doc.text(String(value||'—'),x+2,y+11);
-    doc.setDrawColor(82,183,136);
-    doc.setLineWidth(1);
-    doc.line(x,y+14,x+w,y+14);
-    doc.setLineWidth(0.5);
-  };
-
-  // SECTION 1 — IDENTIFICATION
-  section('1.  IDENTIFICATION DU PRODUIT');
-  field('Produit',l.produit,14,91);
-  field('Variete',l.variete,105,91);
-  y+=15;
-  field('Fournisseur',l.fournisseur,14,91);
-  field('Origine',l.origine,105,91);
-  y+=15;
-  field('Date Reception',fmt(l.date_reception),14,60);
-  field('Heure',l.heure_reception,74,60);
-  field('DLC',fmt(l.dlc),134,62);
-  y+=18;
-
-  // SECTION 2 — CONDITIONNEMENT
-  section('2.  CONDITIONNEMENT');
-  field('Marque',l.marque,14,45);
-  field('Calibre',l.calibre,59,45);
-  field('Quantite',l.quantite?l.quantite+' kg':'—',104,45);
-  field('Emballage',l.conditionnement,149,47);
-  y+=18;
-
-  // SECTION 3 — CATEGORIE
-  section('3.  CATEGORIE');
-  doc.setFillColor(255,255,255);
-  doc.setDrawColor(204,204,204);
-  doc.rect(14,y,182,12,'FD');
-  if(l.categorie){
-    doc.setFillColor(216,243,220);
-    const cats=['Extra','Categorie 1','Categorie 2','Ecart','Tout venant'];
-    const idx=cats.findIndex(c=>l.categorie&&l.categorie.toLowerCase().replace('é','e').includes(c.toLowerCase().split(' ')[0]));
-    if(idx>=0){
-      const x=14+idx*(182/5);
-      doc.rect(x,y,182/5,12,'FD');
-    }
-  }
-  doc.setTextColor(33,33,33);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(8);
-  ['Extra','Cat. 1','Cat. 2','Ecart','Tout venant'].forEach((c,i)=>{
-    doc.text(c,14+i*(182/5)+5,y+7);
-  });
-  if(l.categorie){
-    doc.setTextColor(26,71,49);
-    doc.setFontSize(9);
-    doc.text('✓ '+l.categorie+(l.quantite?' — '+l.quantite+' kg':''),14,y+18);
-  }
-  y+=24;
-
-  // SECTION 4 — TRANSPORT
-  if(l.num_chauffeur||l.matricule_camion||l.signature_fournisseur){
-    field('N° Chauffeur',l.num_chauffeur,14,60);
-    field('Matricule Camion',l.matricule_camion,74,60);
-    field('Signature',l.signature_fournisseur,134,62);
-    y+=18;
-  }
-
-  // SEPARATEUR
-  doc.setDrawColor(170,170,170);
-  doc.setLineDashPattern([2,2],0);
-  doc.line(14,y,196,y);
-  doc.setLineDashPattern([],0);
-  y+=4;
-
-  // RESERVE QUALI-FLEG
-  doc.setFillColor(26,71,49);
-  doc.rect(14,y,182,7,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(9);
-  doc.text("RESERVE A QUALI-FLEG",17,y+5);
-  y+=10;
-  field('Categorie',l.categorie,14,60);
-  field('Quantite Pesee',l.quantite_pesee?l.quantite_pesee+' kg':'—',74,60);
-  field('Date Reception',fmt(l.date_reception),134,62);
-  y+=18;
-
-  // FOOTER
-  doc.setFillColor(26,71,49);
-  doc.rect(0,287,210,10,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','normal');
-  doc.setFontSize(8);
-  doc.text('Les Domaines Agricoles · Station QUALI-FLEG · 2026',14,293);
-  doc.text(`Genere le ${new Date().toLocaleDateString('fr-FR')}`,160,293);
-
-  doc.save(`Fiche_${l.num_lot}.pdf`);
-  logHist('Génération fiche PDF',l.num_lot);
-  notify('📄 Fiche PDF générée !');
-}
-
-// ── FOURNISSEURS ───────────────────────
-async function renderFrs(){
-  const grid=G('frsGrid');
-  grid.innerHTML='<div class="empty"><div class="ei">⏳</div><div class="et">Chargement...</div></div>';
-
-  // Get all quality records
-  const allQ=await db('GET','agreable_qualite',null,'?order=created_at.desc');
-
-  const frsMap={};
-  lots.forEach(l=>{
-    if(!l.fournisseur)return;
-    if(!frsMap[l.fournisseur])frsMap[l.fournisseur]={lots:0,qte:0,refus:0,blocked:0,exp:0,prods:new Set()};
-    frsMap[l.fournisseur].lots++;
-    frsMap[l.fournisseur].qte+=parseFloat(l.quantite)||0;
-    if(l.statut==='Refusé')frsMap[l.fournisseur].refus++;
-    if(l.statut==='Bloqué')frsMap[l.fournisseur].blocked++;
-    if(l.statut==='Expédié')frsMap[l.fournisseur].exp++;
-    if(l.produit)frsMap[l.fournisseur].prods.add(l.produit);
-  });
-
-  // Add quality decisions per fournisseur via lot lookup
-  if(Array.isArray(allQ)){
-    allQ.forEach(q=>{
-      const lot=lots.find(l=>l.num_lot===q.num_lot);
-      if(!lot||!lot.fournisseur)return;
-      if(!frsMap[lot.fournisseur].quality)frsMap[lot.fournisseur].quality={accept:0,sousR:0,refus:0,total:0};
-      frsMap[lot.fournisseur].quality.total++;
-      if(q.decision==='Accepté')frsMap[lot.fournisseur].quality.accept++;
-      else if(q.decision==='Accepté sous réserve')frsMap[lot.fournisseur].quality.sousR++;
-      else if(q.decision==='Refusé')frsMap[lot.fournisseur].quality.refus++;
-    });
-  }
-
-  const arr=Object.entries(frsMap).sort((a,b)=>b[1].lots-a[1].lots);
-  if(!arr.length){grid.innerHTML='<div class="empty"><div class="ei">🏭</div><div class="et">Aucun fournisseur</div></div>';return}
-
-  grid.innerHTML=arr.map(([name,d])=>{
-    const conform=d.quality?Math.round(((d.quality.accept+d.quality.sousR*0.5)/d.quality.total)*100):null;
-    const conformColor=conform===null?'var(--s400)':conform>=80?'var(--g3)':conform>=60?'var(--amb)':'var(--red)';
-    const conformBg=conform===null?'var(--s100)':conform>=80?'linear-gradient(90deg,var(--g3),var(--g4))':conform>=60?'linear-gradient(90deg,var(--amb),#FCD34D)':'linear-gradient(90deg,var(--red),#F87171)';
-    return `<div class="frs-card">
-      <div class="frs-name">🏭 ${name}</div>
-      <div class="frs-stats">
-        <div class="frs-stat"><div class="frs-stat-n">${d.lots}</div><div class="frs-stat-l">Lots</div></div>
-        <div class="frs-stat"><div class="frs-stat-n">${Math.round(d.qte).toLocaleString('fr-FR')}</div><div class="frs-stat-l">Kg total</div></div>
-        <div class="frs-stat"><div class="frs-stat-n" style="color:var(--g3)">${d.exp}</div><div class="frs-stat-l">Expédiés</div></div>
-        <div class="frs-stat"><div class="frs-stat-n" style="color:var(--red)">${d.refus+d.blocked}</div><div class="frs-stat-l">Refusés/Bloq.</div></div>
-      </div>
-      <div style="font-size:11px;color:var(--s500);margin-top:8px"><b>${d.prods.size}</b> produit(s) : ${[...d.prods].slice(0,3).join(', ')}${d.prods.size>3?'...':''}</div>
-      ${conform!==null?`<div class="frs-conform"><div style="font-size:11px;color:var(--s500);font-weight:600">Conformité</div><div class="frs-conform-bar"><div class="frs-conform-fill" style="width:${conform}%;background:${conformBg}"></div></div><div class="frs-conform-val" style="color:${conformColor}">${conform}%</div></div>`:'<div style="font-size:11px;color:var(--s400);margin-top:10px;font-style:italic">Pas encore de contrôle qualité</div>'}
-    </div>`;
-  }).join('');
-}
-
-// ── PERTES ─────────────────────────────
-async function renderPertes(){
-  const allP=await db('GET','suivi_production',null,'?order=created_at.desc');
-  const allPF=await db('GET','controle_pf',null,'?order=created_at.desc');
-
-  let totalDecl=0,totalPesee=0,totalProdIn=0,totalProdOut=0,totalPFCtrl=0,totalPFConf=0,totalExp=0;
-
-  lots.forEach(l=>{
-    totalDecl+=parseFloat(l.quantite)||0;
-    totalPesee+=parseFloat(l.quantite_pesee)||0;
-  });
-  if(Array.isArray(allP))allP.forEach(p=>{
-    totalProdIn+=parseFloat(p.qte_entree)||0;
-    totalProdOut+=parseFloat(p.qte_sortie)||0;
-  });
-  if(Array.isArray(allPF))allPF.forEach(p=>{
-    totalPFCtrl+=parseFloat(p.qte_controlee)||0;
-    totalPFConf+=parseFloat(p.qte_conforme)||0;
-  });
-
-  const allExp=await db('GET','expedition',null,'?order=created_at.desc');
-  if(Array.isArray(allExp))allExp.forEach(e=>{totalExp+=parseFloat(e.qte_expediee)||0});
-
-  const perteRecep=totalDecl>0?totalDecl-totalPesee:0;
-  const perteProd=totalProdIn>0?totalProdIn-totalProdOut:0;
-  const pertePF=totalPFCtrl>0?totalPFCtrl-totalPFConf:0;
-  const totalPerte=perteRecep+perteProd+pertePF;
-  const pctTotal=totalDecl>0?((totalPerte/totalDecl)*100).toFixed(1):0;
-
-  G('pTot').textContent=Math.round(totalDecl).toLocaleString('fr-FR');
-  G('pPes').textContent=Math.round(totalPesee).toLocaleString('fr-FR');
-  G('pProd').textContent=Math.round(perteProd).toLocaleString('fr-FR');
-  G('pTotal').textContent=pctTotal+'%';
-
-  const fmtKg=v=>Math.round(v).toLocaleString('fr-FR')+' kg';
-  const cls=v=>v<2?'ok':v<5?'warn':'danger';
-  const pctRecep=totalDecl>0?((perteRecep/totalDecl)*100).toFixed(1):0;
-  const pctProd=totalProdIn>0?((perteProd/totalProdIn)*100).toFixed(1):0;
-  const pctPF=totalPFCtrl>0?((pertePF/totalPFCtrl)*100).toFixed(1):0;
-
-  G('pertesDetail').innerHTML=`
-    <div class="pertes-row">
-      <div class="pertes-stage"><div class="pertes-icon">📥</div>Pertes à la Réception (déclarée vs pesée)</div>
-      <div class="pertes-val ${cls(pctRecep)}">${fmtKg(perteRecep)} (${pctRecep}%)</div>
-    </div>
-    <div class="pertes-row">
-      <div class="pertes-stage"><div class="pertes-icon">⚙️</div>Pertes en Production (tri/calibrage/lavage)</div>
-      <div class="pertes-val ${cls(pctProd)}">${fmtKg(perteProd)} (${pctProd}%)</div>
-    </div>
-    <div class="pertes-row">
-      <div class="pertes-stage"><div class="pertes-icon">🔍</div>Pertes au Contrôle PF (non conformes)</div>
-      <div class="pertes-val ${cls(pctPF)}">${fmtKg(pertePF)} (${pctPF}%)</div>
-    </div>
-    <div class="pertes-row">
-      <div class="pertes-stage"><div class="pertes-icon">📉</div>TOTAL DES PERTES</div>
-      <div class="pertes-val ${cls(pctTotal)}">${fmtKg(totalPerte)} (${pctTotal}%)</div>
-    </div>
-  `;
 }
 
 // ── PRINT QR ───────────────────────────
