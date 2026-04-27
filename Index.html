@@ -751,14 +751,31 @@ const fmtDT=d=>{if(!d)return'—';try{return new Date(d).toLocaleString('fr-FR',
 // ── DB ─────────────────────────────────
 async function db(method,table,body,filter=''){
   try{
-    const res=await fetch(`${SB}/rest/v1/${table}${filter}`,{
+    // Cache-busting on GET requests
+    const url=method==='GET'?`${SB}/rest/v1/${table}${filter}${filter.includes('?')?'&':'?'}_t=${Date.now()}`:`${SB}/rest/v1/${table}${filter}`;
+    const res=await fetch(url,{
       method,
-      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':'return=minimal'},
+      cache:'no-store',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':'return=minimal','Cache-Control':'no-cache'},
       body:body?JSON.stringify(body):null
     });
-    if(method==='GET')return res.ok?res.json():[];
+    if(method==='GET'){
+      if(!res.ok){console.error('GET error:',table,res.status);return[]}
+      const data=await res.json();
+      console.log('[DB GET]',table,'→',Array.isArray(data)?data.length:'?','rows');
+      return data;
+    }
+    if(!res.ok){
+      const errText=await res.text();
+      console.error('[DB '+method+'] error:',errText);
+      notify('❌ Erreur: '+(errText.substring(0,100)),'err');
+    }
     return res;
-  }catch(e){notify('❌ Erreur de connexion','err');return[]}
+  }catch(e){
+    console.error('[DB] exception:',e);
+    notify('❌ Erreur de connexion','err');
+    return method==='GET'?[]:null;
+  }
 }
 
 async function logHist(action,numLot,details=''){
@@ -1064,7 +1081,10 @@ async function saveLot(){
   ['fa','fb','fFrs','fProd','fVar','fOrig','fMar','fH','fQ','fQP','fLien','fDLC','fTemp','fChauf','fMat','fSign'].forEach(id=>{if(G(id))G(id).value=''});
   removePhoto();
   G('fStat').value='En attente';G('fCat').value='';G('fCond').value='';G('fCal').value='';
-  await loadLots();checkAlerts();
+  // Small delay to ensure Supabase has committed
+  await new Promise(r=>setTimeout(r,400));
+  await loadLots();
+  checkAlerts();
 }
 
 async function delLot(id,numLot){
