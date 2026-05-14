@@ -736,6 +736,9 @@ let currentView = 'dashboard';
 let filterR = 'all';
 let filterPF = 'all';
 let currentLotDetail = null;
+let editingLotR = null;   // num_lot du lot R en cours d'édition (null = création)
+let editingLotPF = null;  // num_lot_pf du lot PF en cours d'édition (null = création)
+let savingInProgress = false; // Protection contre double-clic
 
 // ── HELPERS ─────────────────────────────────────────────
 const G = id => document.getElementById(id);
@@ -777,7 +780,10 @@ function fmtNum(n, d = 2) {
   if (n === null || n === undefined || n === '') return '—';
   const v = Number(n);
   if (isNaN(v)) return '—';
-  return v.toFixed(d).replace(/\.?0+$/, '');
+  // Si pas de décimales demandées, retourner l'entier tel quel (sans toucher aux zéros)
+  if (d === 0) return v.toFixed(0);
+  // Sinon, formater avec d décimales et supprimer SEULEMENT les zéros après le point décimal
+  return v.toFixed(d).replace(/\.?0+$/, '').replace(/\.$/, '');
 }
 
 // ── DB HELPER ───────────────────────────────────────────
@@ -886,13 +892,18 @@ function goView(name, btnEl) {
 // ── MODALS ──────────────────────────────────────────────
 function openModal(name) {
   if (name === 'addLotR') {
-    G('fd').value = new Date().toISOString().slice(0, 10);
-    suggestNextFiche('R');
+    // Reset mode édition si c'est une création
+    if (!editingLotR) {
+      G('fd').value = new Date().toISOString().slice(0, 10);
+      suggestNextFiche('R');
+    }
     updPrev();
   }
   if (name === 'addLotPF') {
-    G('pfd').value = new Date().toISOString().slice(0, 10);
-    suggestNextFiche('PF');
+    if (!editingLotPF) {
+      G('pfd').value = new Date().toISOString().slice(0, 10);
+      suggestNextFiche('PF');
+    }
     populateLotRecepDropdown();
     updPrevPF();
   }
@@ -902,6 +913,9 @@ function openModal(name) {
 function closeModal(name) {
   G('modal-' + name).classList.remove('open');
   if (name === 'lotDetail') currentLotDetail = null;
+  // Si on ferme le modal de création/édition lot, reset le mode
+  if (name === 'addLotR') resetLotRForm();
+  if (name === 'addLotPF') resetLotPFForm();
 }
 
 // Click on overlay to close
@@ -913,6 +927,106 @@ $$('.overlay').forEach(o => {
     }
   });
 });
+
+// Échap ferme le modal au-dessus
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const openOverlay = document.querySelector('.overlay.open');
+    if (openOverlay) {
+      const id = openOverlay.id.replace('modal-', '');
+      closeModal(id);
+    }
+  }
+});
+
+// Entrée dans un champ texte d'un modal soumet le formulaire principal
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (e.target.tagName === 'TEXTAREA') return; // Pas dans les textarea
+  const openOverlay = document.querySelector('.overlay.open');
+  if (!openOverlay) return;
+  const id = openOverlay.id.replace('modal-', '');
+  if (id === 'addLotR') { e.preventDefault(); saveLotR(); }
+  else if (id === 'addLotPF') { e.preventDefault(); saveLotPF(); }
+});
+
+// ── ÉDITION D'UN LOT EXISTANT ──────────────────────────
+function editLotR(numLot) {
+  const lot = allLotsR.find(l => l.num_lot === numLot);
+  if (!lot) return notif('Lot introuvable', 'err');
+  editingLotR = numLot;
+  // Pré-remplir tous les champs
+  G('fa').value = lot.abr_produit || '';
+  G('fb').value = lot.abr_fournisseur || '';
+  G('fc_').value = parseInt(lot.num_fiche, 10) || '';
+  G('fd').value = lot.date_reception || '';
+  G('fCond').value = lot.conditionnement || '';
+  G('fProd').value = lot.produit || '';
+  G('fVar').value = lot.variete || '';
+  G('fMarque').value = lot.marque || '';
+  G('fCalibre').value = lot.calibre_reception || '';
+  G('fQte').value = lot.quantite_recue || '';
+  G('fCat').value = lot.categorie || '';
+  G('fFrs').value = lot.fournisseur || '';
+  G('fDom').value = lot.domaine_producteur || '';
+  G('fBL').value = lot.num_bon_livraison || '';
+  G('fStat').value = lot.statut || 'En attente';
+  G('fLien').value = lot.lien_fiche || '';
+  // Changer titre et bouton
+  const titleEl = document.querySelector('#modal-addLotR .modal-title');
+  if (titleEl) titleEl.innerHTML = `✏️ Modifier le Lot — <span style="font-family:var(--mono);font-size:14px">${numLot}</span>`;
+  const btnEl = document.querySelector('#modal-addLotR .form-actions .btn-primary');
+  if (btnEl) btnEl.innerHTML = '💾 Enregistrer les modifications';
+  // Si modal détail ouvert, le fermer pour ne pas avoir 2 modals
+  closeModal('lotDetail');
+  openModal('addLotR');
+  updPrev();
+}
+
+function editLotPF(numLotPF) {
+  const lot = allLotsPF.find(l => l.num_lot_pf === numLotPF);
+  if (!lot) return notif('Lot PF introuvable', 'err');
+  editingLotPF = numLotPF;
+  // Extraire abréviations depuis le N° lot PF (format: PROD-CLIENT-JJSS-EMB-FICHE)
+  const parts = numLotPF.split('-');
+  G('pfa').value = parts[0] || '';
+  G('pfb').value = parts[1] || '';
+  G('pfc_').value = parseInt(lot.num_fiche_pf, 10) || '';
+  G('pfd').value = lot.date_controle_pf || '';
+  // Trouver le conditionnement depuis code_emballage
+  const condSel = G('pfCond');
+  for (let i = 0; i < condSel.options.length; i++) {
+    if (condSel.options[i].dataset.code === lot.code_emballage) {
+      condSel.selectedIndex = i;
+      break;
+    }
+  }
+  populateLotRecepDropdown();
+  G('pfLotRecep').value = lot.num_lot_reception || '';
+  G('pfProd').value = lot.produit || '';
+  G('pfClient').value = lot.client || '';
+  G('pfDest').value = lot.destination || '';
+  G('pfUnit').value = lot.unite || '';
+  G('pfType').value = lot.type_produit || '';
+  G('pfCat').value = lot.categorie_pf || '';
+  G('pfCal').value = lot.calibre_pf || '';
+  G('pfBrix').value = lot.brix_pf ?? '';
+  G('pfFerm').value = lot.fermete_pf ?? '';
+  G('pfChair').value = lot.chair || '';
+  G('pfSav').value = lot.saveur || '';
+  G('pfCoul').value = lot.couleur || '';
+  G('pfAsp').value = lot.aspect || '';
+  G('pfObs').value = lot.observations_pf || '';
+  G('pfDec').value = lot.decision_pf || '';
+  G('pfLien').value = lot.lien_fiche_pf || '';
+  const titleEl = document.querySelector('#modal-addLotPF .modal-title');
+  if (titleEl) titleEl.innerHTML = `✏️ Modifier le Lot PF — <span style="font-family:var(--mono);font-size:14px">${numLotPF}</span>`;
+  const btnEl = document.querySelector('#modal-addLotPF .form-actions .btn-primary');
+  if (btnEl) btnEl.innerHTML = '💾 Enregistrer les modifications';
+  closeModal('lotDetail');
+  openModal('addLotPF');
+  updPrevPF();
+}
 
 function suggestNextFiche(type) {
   if (type === 'R') {
@@ -974,8 +1088,9 @@ function updPrevPF() {
   G('lotPrevPF').textContent = num;
 }
 
-// ── SAVE LOT RÉCEPTION ──────────────────────────────────
+// ── SAVE LOT RÉCEPTION (création OU édition) ────────────
 async function saveLotR() {
+  if (savingInProgress) return; // Protection double-clic
   const a = (G('fa').value || '').toUpperCase().trim();
   const b = (G('fb').value || '').toUpperCase().trim();
   const f = (G('fc_').value || '').trim();
@@ -986,26 +1101,32 @@ async function saveLotR() {
   const frs = G('fFrs').value.trim();
   const qte = G('fQte').value;
 
-  if (!a || a.length !== 3) return notif('Abrév. produit doit faire 3 lettres', 'err');
-  if (!b || b.length !== 3) return notif('Abrév. fournisseur doit faire 3 lettres', 'err');
+  // Validations strictes des abréviations : exactement 3 caractères A-Z ou 0-9, pas d'espace ni de tiret
+  if (!/^[A-Z0-9]{3}$/.test(a)) return notif('Abrév. produit : 3 lettres/chiffres exactement (sans espace ni tiret)', 'err');
+  if (!/^[A-Z0-9]{3}$/.test(b)) return notif('Abrév. fournisseur : 3 lettres/chiffres exactement (sans espace ni tiret)', 'err');
   if (!f) return notif('N° fiche obligatoire', 'err');
+  const fNum = parseInt(f, 10);
+  if (isNaN(fNum) || fNum <= 0) return notif('N° fiche doit être un entier positif (≥ 1)', 'err');
   if (!d) return notif('Date obligatoire', 'err');
-  if (!cond) return notif('Conditionnement obligatoire', 'err');
+  if (!cond || !condCode) return notif('Conditionnement obligatoire', 'err');
   if (!prod) return notif('Produit obligatoire', 'err');
   if (!frs) return notif('Fournisseur obligatoire', 'err');
   if (!qte) return notif('Quantité obligatoire', 'err');
+  const qteNum = parseFloat(qte);
+  if (isNaN(qteNum) || qteNum <= 0) return notif('Quantité doit être un nombre positif (> 0)', 'err');
 
   const dt = new Date(d);
   const jjss = pad(dt.getDate(), 2) + pad(getISOWeek(dt), 2);
-  const numLot = `${a}-${b}-${jjss}-${condCode}-${pad(f, 3)}`;
+  const numLot = `${a}-${b}-${jjss}-${condCode}-${pad(fNum, 3)}`;
 
-  if (allLotsR.some(l => l.num_lot === numLot)) {
+  // Vérif doublon SAUF si c'est une édition du même lot
+  if (allLotsR.some(l => l.num_lot === numLot && l.num_lot !== editingLotR)) {
     return notif('Ce N° de lot existe déjà', 'err');
   }
 
   const data = {
     num_lot: numLot,
-    num_fiche: f,
+    num_fiche: pad(fNum, 3),
     date_reception: d,
     abr_produit: a,
     abr_fournisseur: b,
@@ -1013,7 +1134,7 @@ async function saveLotR() {
     variete: G('fVar').value.trim() || null,
     marque: G('fMarque').value.trim() || null,
     calibre_reception: G('fCalibre').value.trim() || null,
-    quantite_recue: parseFloat(qte) || 0,
+    quantite_recue: qteNum,
     categorie: G('fCat').value || null,
     conditionnement: cond,
     code_emballage: condCode,
@@ -1026,15 +1147,30 @@ async function saveLotR() {
   };
 
   try {
+    savingInProgress = true;
     loader(true);
-    await db('POST', 'lots', data);
-    notif('✓ Lot créé : ' + numLot);
+    const isEdit = !!editingLotR;
+    if (isEdit) {
+      // PATCH : modification d'un lot existant
+      await db('PATCH', 'lots', data, `num_lot=eq.${encodeURIComponent(editingLotR)}`);
+      // Si le N° lot a changé, propager aux sub-records
+      if (editingLotR !== numLot) {
+        await Promise.all([
+          db('PATCH', 'agreable_qualite', { num_lot: numLot }, `num_lot=eq.${encodeURIComponent(editingLotR)}`),
+          db('PATCH', 'suivi_production', { num_lot: numLot }, `num_lot=eq.${encodeURIComponent(editingLotR)}`),
+          db('PATCH', 'expedition', { num_lot: numLot }, `num_lot=eq.${encodeURIComponent(editingLotR)}`),
+          db('PATCH', 'incidents', { num_lot: numLot }, `num_lot=eq.${encodeURIComponent(editingLotR)}`),
+          db('PATCH', 'lots_pf', { num_lot_reception: numLot }, `num_lot_reception=eq.${encodeURIComponent(editingLotR)}`)
+        ]);
+      }
+      notif('✓ Lot modifié : ' + numLot);
+    } else {
+      // POST : création
+      await db('POST', 'lots', data);
+      notif('✓ Lot créé : ' + numLot);
+    }
     closeModal('addLotR');
-    // Reset
-    ['fa','fb','fc_','fProd','fVar','fMarque','fCalibre','fQte','fFrs','fDom','fBL','fLien'].forEach(id => G(id).value = '');
-    G('fCond').value = '';
-    G('fCat').value = '';
-    G('fStat').value = 'En attente';
+    resetLotRForm();
     await loadAll();
     renderLotsR();
     renderDashboard();
@@ -1043,12 +1179,27 @@ async function saveLotR() {
   } catch (e) {
     notif('Erreur: ' + e.message, 'err');
   } finally {
+    savingInProgress = false;
     loader(false);
   }
 }
 
-// ── SAVE LOT PF ─────────────────────────────────────────
+function resetLotRForm() {
+  editingLotR = null;
+  ['fa','fb','fc_','fProd','fVar','fMarque','fCalibre','fQte','fFrs','fDom','fBL','fLien'].forEach(id => G(id).value = '');
+  G('fCond').value = '';
+  G('fCat').value = '';
+  G('fStat').value = 'En attente';
+  // Remettre le titre du modal en mode création
+  const titleEl = document.querySelector('#modal-addLotR .modal-title');
+  if (titleEl) titleEl.innerHTML = '📥 Nouveau Lot Réception — Identification';
+  const btnEl = document.querySelector('#modal-addLotR .form-actions .btn-primary');
+  if (btnEl) btnEl.innerHTML = '💾 Enregistrer le Lot';
+}
+
+// ── SAVE LOT PF (création OU édition) ───────────────────
 async function saveLotPF() {
+  if (savingInProgress) return; // Protection double-clic
   const a = (G('pfa').value || '').toUpperCase().trim();
   const b = (G('pfb').value || '').toUpperCase().trim();
   const f = (G('pfc_').value || '').trim();
@@ -1059,27 +1210,35 @@ async function saveLotPF() {
   const cli = G('pfClient').value.trim();
   const dec = G('pfDec').value;
 
-  if (!a || a.length !== 3) return notif('Abrév. produit doit faire 3 lettres', 'err');
-  if (!b || b.length !== 3) return notif('Abrév. client doit faire 3 lettres', 'err');
+  if (!/^[A-Z0-9]{3}$/.test(a)) return notif('Abrév. produit : 3 lettres/chiffres exactement (sans espace ni tiret)', 'err');
+  if (!/^[A-Z0-9]{3}$/.test(b)) return notif('Abrév. client : 3 lettres/chiffres exactement (sans espace ni tiret)', 'err');
   if (!f) return notif('N° fiche PF obligatoire', 'err');
+  const fNum = parseInt(f, 10);
+  if (isNaN(fNum) || fNum <= 0) return notif('N° fiche doit être un entier positif (≥ 1)', 'err');
   if (!d) return notif('Date obligatoire', 'err');
-  if (!cond) return notif('Emballage obligatoire', 'err');
+  if (!cond || !condCode) return notif('Emballage obligatoire', 'err');
   if (!prod) return notif('Produit obligatoire', 'err');
   if (!cli) return notif('Client obligatoire', 'err');
   if (!dec) return notif('Décision PF obligatoire', 'err');
 
+  // Validations numériques optionnelles (Brix, Fermeté)
+  const brixVal = G('pfBrix').value;
+  if (brixVal !== '' && (isNaN(parseFloat(brixVal)) || parseFloat(brixVal) < 0)) return notif('Brix doit être un nombre positif', 'err');
+  const fermVal = G('pfFerm').value;
+  if (fermVal !== '' && (isNaN(parseFloat(fermVal)) || parseFloat(fermVal) < 0)) return notif('Fermeté doit être un nombre positif', 'err');
+
   const dt = new Date(d);
   const jjss = pad(dt.getDate(), 2) + pad(getISOWeek(dt), 2);
-  const numLotPF = `${a}-${b}-${jjss}-${condCode}-${pad(f, 3)}`;
+  const numLotPF = `${a}-${b}-${jjss}-${condCode}-${pad(fNum, 3)}`;
 
-  if (allLotsPF.some(l => l.num_lot_pf === numLotPF)) {
+  if (allLotsPF.some(l => l.num_lot_pf === numLotPF && l.num_lot_pf !== editingLotPF)) {
     return notif('Ce N° de lot PF existe déjà', 'err');
   }
 
   const data = {
     num_lot_pf: numLotPF,
     num_lot_reception: G('pfLotRecep').value || null,
-    num_fiche_pf: f,
+    num_fiche_pf: pad(fNum, 3),
     date_controle_pf: d,
     produit: prod,
     client: cli,
@@ -1088,8 +1247,8 @@ async function saveLotPF() {
     type_produit: G('pfType').value || null,
     categorie_pf: G('pfCat').value || null,
     calibre_pf: G('pfCal').value.trim() || null,
-    brix_pf: G('pfBrix').value ? parseFloat(G('pfBrix').value) : null,
-    fermete_pf: G('pfFerm').value ? parseFloat(G('pfFerm').value) : null,
+    brix_pf: brixVal ? parseFloat(brixVal) : null,
+    fermete_pf: fermVal ? parseFloat(fermVal) : null,
     chair: G('pfChair').value || null,
     saveur: G('pfSav').value || null,
     couleur: G('pfCoul').value || null,
@@ -1103,13 +1262,22 @@ async function saveLotPF() {
   };
 
   try {
+    savingInProgress = true;
     loader(true);
-    await db('POST', 'lots_pf', data);
-    notif('✓ Lot PF créé : ' + numLotPF);
+    const isEdit = !!editingLotPF;
+    if (isEdit) {
+      await db('PATCH', 'lots_pf', data, `num_lot_pf=eq.${encodeURIComponent(editingLotPF)}`);
+      // Propager le nouveau N° aux expéditions qui le référencent
+      if (editingLotPF !== numLotPF) {
+        await db('PATCH', 'expedition', { num_lot_pf_ref: numLotPF }, `num_lot_pf_ref=eq.${encodeURIComponent(editingLotPF)}`);
+      }
+      notif('✓ Lot PF modifié : ' + numLotPF);
+    } else {
+      await db('POST', 'lots_pf', data);
+      notif('✓ Lot PF créé : ' + numLotPF);
+    }
     closeModal('addLotPF');
-    // Reset
-    ['pfa','pfb','pfc_','pfProd','pfClient','pfDest','pfCal','pfBrix','pfFerm','pfObs','pfLien'].forEach(id => G(id).value = '');
-    ['pfCond','pfUnit','pfType','pfCat','pfChair','pfSav','pfCoul','pfAsp','pfDec','pfLotRecep'].forEach(id => G(id).value = '');
+    resetLotPFForm();
     await loadAll();
     renderLotsPF();
     renderDashboard();
@@ -1118,8 +1286,19 @@ async function saveLotPF() {
   } catch (e) {
     notif('Erreur: ' + e.message, 'err');
   } finally {
+    savingInProgress = false;
     loader(false);
   }
+}
+
+function resetLotPFForm() {
+  editingLotPF = null;
+  ['pfa','pfb','pfc_','pfProd','pfClient','pfDest','pfCal','pfBrix','pfFerm','pfObs','pfLien'].forEach(id => G(id).value = '');
+  ['pfCond','pfUnit','pfType','pfCat','pfChair','pfSav','pfCoul','pfAsp','pfDec','pfLotRecep'].forEach(id => G(id).value = '');
+  const titleEl = document.querySelector('#modal-addLotPF .modal-title');
+  if (titleEl) titleEl.innerHTML = '🏷️ Nouveau Lot Produit Fini — Annexe 3 Magasin Marché de Gros';
+  const btnEl = document.querySelector('#modal-addLotPF .form-actions .btn-primary');
+  if (btnEl) btnEl.innerHTML = '💾 Enregistrer le Lot PF';
 }
 
 // ── DELETE LOT ──────────────────────────────────────────
@@ -1153,9 +1332,18 @@ async function delLotR(numLot) {
 }
 
 async function delLotPF(numLotPF) {
-  if (!confirm(`Supprimer le lot PF ${numLotPF} ?`)) return;
+  const childExp = allExpedition.filter(e => e.num_lot_pf_ref === numLotPF);
+  let msg = `Supprimer le lot PF ${numLotPF} ?`;
+  if (childExp.length) {
+    msg += `\n\n⚠️ ${childExp.length} expédition(s) référencent ce lot PF. Ces références seront effacées (les expéditions resteront, mais perdront le lien vers ce lot PF).`;
+  }
+  if (!confirm(msg)) return;
   try {
     loader(true);
+    // Nettoyer les références dans expedition avant de supprimer
+    if (childExp.length) {
+      await db('PATCH', 'expedition', { num_lot_pf_ref: null }, `num_lot_pf_ref=eq.${encodeURIComponent(numLotPF)}`);
+    }
     await db('DELETE', 'lots_pf', null, `num_lot_pf=eq.${encodeURIComponent(numLotPF)}`);
     notif('✓ Lot PF supprimé');
     await loadAll();
@@ -1177,10 +1365,19 @@ function renderDashboard() {
   const totalRecu = allLotsR.reduce((s, l) => s + (parseFloat(l.quantite_recue) || 0), 0);
   const totalExp = allExpedition.reduce((s, e) => s + (parseFloat(e.quantite_expediee) || 0), 0);
 
-  // Décisions qualité
-  const decAccept = allQualite.filter(q => q.decision_reception === 'ACCEPTÉ').length;
-  const decRefus = allQualite.filter(q => q.decision_reception === 'NON ACCEPTÉ').length;
-  const decAttente = allQualite.filter(q => q.decision_reception === 'À VALIDER').length;
+  // Décisions qualité : prendre la DERNIÈRE décision de chaque lot
+  const lastDecisionPerLot = {};
+  allQualite.forEach(q => {
+    if (!q.num_lot) return;
+    const prev = lastDecisionPerLot[q.num_lot];
+    if (!prev || new Date(q.created_at || 0) > new Date(prev.created_at || 0)) {
+      lastDecisionPerLot[q.num_lot] = q;
+    }
+  });
+  const decisionsLot = Object.values(lastDecisionPerLot);
+  const decAccept = decisionsLot.filter(q => q.decision_reception === 'ACCEPTÉ').length;
+  const decRefus = decisionsLot.filter(q => q.decision_reception === 'NON ACCEPTÉ').length;
+  const decAttente = decisionsLot.filter(q => q.decision_reception === 'À VALIDER').length;
 
   // PF conformes
   const pfConf = allLotsPF.filter(l => l.decision_pf === 'CONFORME').length;
@@ -1196,9 +1393,18 @@ function renderDashboard() {
   // Incidents ouverts
   const incOuverts = allIncidents.filter(i => i.statut === 'Ouvert' || i.statut === 'En cours').length;
 
-  // % défauts moyen
-  const qtAvecDef = allQualite.filter(q => q.pct_defauts !== null && q.pct_defauts !== undefined);
-  const pctDefMoyen = qtAvecDef.length ? qtAvecDef.reduce((s, q) => s + parseFloat(q.pct_defauts), 0) / qtAvecDef.length : 0;
+  // % défauts moyen pondéré par les quantités reçues (statistiquement correct)
+  let totalDefKg = 0;
+  let totalQteKg = 0;
+  allQualite.forEach(q => {
+    if (q.pct_defauts === null || q.pct_defauts === undefined) return;
+    const lot = allLotsR.find(l => l.num_lot === q.num_lot);
+    const qte = parseFloat(lot?.quantite_recue) || 0;
+    if (qte <= 0) return;
+    totalDefKg += (parseFloat(q.pct_defauts) / 100) * qte;
+    totalQteKg += qte;
+  });
+  const pctDefMoyen = totalQteKg > 0 ? (totalDefKg / totalQteKg) * 100 : 0;
 
   G('kpiGrid').innerHTML = `
     <div class="kpi"><div class="kpi-icon">📥</div><div class="kpi-label">Lots Réception</div><div class="kpi-value">${totalLotsR}</div></div>
@@ -1223,7 +1429,8 @@ function renderDashboard() {
     return;
   }
   body.innerHTML = recent.map(l => {
-    const q = allQualite.find(x => x.num_lot === l.num_lot);
+    const qs = allQualite.filter(x => x.num_lot === l.num_lot);
+    const q = qs.length ? qs.reduce((a, b) => (new Date(a.created_at || 0) > new Date(b.created_at || 0) ? a : b)) : null;
     const dec = q?.decision_reception || '—';
     return `<tr class="clickable" onclick="showLot('${esc(l.num_lot)}','R')">
       <td><span class="lot-num">${esc(l.num_lot)}</span></td>
@@ -1281,12 +1488,18 @@ function renderLotsR() {
       (l.produit || '').toLowerCase().includes(search) ||
       (l.fournisseur || '').toLowerCase().includes(search) ||
       (l.variete || '').toLowerCase().includes(search) ||
-      (l.domaine_producteur || '').toLowerCase().includes(search)
+      (l.marque || '').toLowerCase().includes(search) ||
+      (l.calibre_reception || '').toLowerCase().includes(search) ||
+      (l.num_bon_livraison || '').toLowerCase().includes(search) ||
+      (l.num_fiche || '').toString().toLowerCase().includes(search) ||
+      (l.domaine_producteur || '').toLowerCase().includes(search) ||
+      (l.categorie || '').toLowerCase().includes(search)
     );
   }
   if (filterR !== 'all') {
     list = list.filter(l => {
-      const q = allQualite.find(x => x.num_lot === l.num_lot);
+      const qs = allQualite.filter(x => x.num_lot === l.num_lot);
+      const q = qs.length ? qs.reduce((a, b) => (new Date(a.created_at || 0) > new Date(b.created_at || 0) ? a : b)) : null;
       const d = q?.decision_reception;
       if (filterR === 'accepte') return d === 'ACCEPTÉ';
       if (filterR === 'refuse') return d === 'NON ACCEPTÉ';
@@ -1300,7 +1513,8 @@ function renderLotsR() {
     return;
   }
   body.innerHTML = list.map(l => {
-    const q = allQualite.find(x => x.num_lot === l.num_lot);
+    const qs = allQualite.filter(x => x.num_lot === l.num_lot);
+    const q = qs.length ? qs.reduce((a, b) => (new Date(a.created_at || 0) > new Date(b.created_at || 0) ? a : b)) : null;
     const dec = q?.decision_reception || '—';
     return `<tr class="clickable" onclick="showLot('${esc(l.num_lot)}','R')">
       <td><span class="lot-num">${esc(l.num_lot)}</span></td>
@@ -1312,6 +1526,7 @@ function renderLotsR() {
       <td>${badgeDecision(dec)}</td>
       <td onclick="event.stopPropagation()"><div class="row-actions">
         <button class="row-btn" title="Voir" onclick="showLot('${esc(l.num_lot)}','R')">👁</button>
+        <button class="row-btn" title="Modifier" onclick="editLotR('${esc(l.num_lot)}')">✏️</button>
         <button class="row-btn del" title="Supprimer" onclick="delLotR('${esc(l.num_lot)}')">🗑</button>
       </div></td>
     </tr>`;
@@ -1334,7 +1549,12 @@ function renderLotsPF() {
       (l.num_lot_pf || '').toLowerCase().includes(search) ||
       (l.produit || '').toLowerCase().includes(search) ||
       (l.client || '').toLowerCase().includes(search) ||
-      (l.num_lot_reception || '').toLowerCase().includes(search)
+      (l.num_lot_reception || '').toLowerCase().includes(search) ||
+      (l.destination || '').toLowerCase().includes(search) ||
+      (l.categorie_pf || '').toLowerCase().includes(search) ||
+      (l.calibre_pf || '').toLowerCase().includes(search) ||
+      (l.num_fiche_pf || '').toString().toLowerCase().includes(search) ||
+      (l.type_produit || '').toLowerCase().includes(search)
     );
   }
   if (filterPF !== 'all') {
@@ -1360,6 +1580,7 @@ function renderLotsPF() {
     <td>${badgeDecision(l.decision_pf)}</td>
     <td onclick="event.stopPropagation()"><div class="row-actions">
       <button class="row-btn" title="Voir" onclick="showLot('${esc(l.num_lot_pf)}','PF')">👁</button>
+      <button class="row-btn" title="Modifier" onclick="editLotPF('${esc(l.num_lot_pf)}')">✏️</button>
       <button class="row-btn del" title="Supprimer" onclick="delLotPF('${esc(l.num_lot_pf)}')">🗑</button>
     </div></td>
   </tr>`).join('');
@@ -1409,10 +1630,11 @@ function renderLotDetailR(lot) {
         ${lot.lien_fiche && lot.lien_fiche.trim() ? `
           <p>✅ Ce QR pointe vers <strong>la fiche Google Drive</strong>. Scannez pour ouvrir directement la fiche.</p>
         ` : `
-          <p>⚠️ <strong>Aucun lien Google Drive renseigné</strong> — le QR affichera seulement le N° de lot. Pour une fiche détaillée, modifiez ce lot et ajoutez le lien Drive.</p>
+          <p>⚠️ <strong>Aucun lien Google Drive renseigné</strong> — le QR affichera seulement le N° de lot. Cliquez sur le bouton <strong>✏️ Modifier</strong> ci-dessous pour ajouter le lien Drive.</p>
         `}
         <button class="btn btn-secondary btn-sm" onclick="printLotR('${esc(numLot)}')">🖨️ Imprimer la fiche</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadQR('qrLot','${esc(numLot)}')">⬇️ Télécharger QR</button>
+        <button class="btn btn-secondary btn-sm" onclick="editLotR('${esc(numLot)}')">✏️ Modifier</button>
         <button class="btn btn-secondary btn-sm" onclick="exportLotRPDF('${esc(numLot)}')">📄 Export PDF</button>
       </div>
     </div>
@@ -1496,10 +1718,11 @@ function renderLotDetailPF(lot) {
         ${lot.lien_fiche_pf && lot.lien_fiche_pf.trim() ? `
           <p>✅ Ce QR pointe vers <strong>la fiche PF Google Drive</strong>. À apposer sur le conditionnement client.</p>
         ` : `
-          <p>⚠️ <strong>Aucun lien Google Drive renseigné</strong> — le QR affichera seulement le N° de lot PF. Pour une fiche détaillée, modifiez ce lot et ajoutez le lien Drive.</p>
+          <p>⚠️ <strong>Aucun lien Google Drive renseigné</strong> — le QR affichera seulement le N° de lot PF. Cliquez sur le bouton <strong>✏️ Modifier</strong> ci-dessous pour ajouter le lien Drive.</p>
         `}
         <button class="btn btn-secondary btn-sm" onclick="printLotPF('${esc(numLotPF)}')">🖨️ Imprimer</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadQR('qrLotPF','${esc(numLotPF)}')">⬇️ Télécharger QR</button>
+        <button class="btn btn-secondary btn-sm" onclick="editLotPF('${esc(numLotPF)}')">✏️ Modifier</button>
         <button class="btn btn-secondary btn-sm" onclick="exportLotPFPDF('${esc(numLotPF)}')">📄 Export PDF</button>
       </div>
     </div>
@@ -1647,13 +1870,31 @@ function calcDefauts() {
 }
 
 async function addQualite(numLot) {
+  // Validations sur défauts (pas de valeurs négatives)
+  for (let i = 1; i <= 15; i++) {
+    const v = G('q-d' + i).value;
+    if (v !== '' && parseFloat(v) < 0) {
+      return notif('Les défauts ne peuvent pas être négatifs', 'err');
+    }
+  }
+  // Vérif totale
+  const totalVal = G('q-totqte').value;
+  if (totalVal !== '' && parseFloat(totalVal) < 0) {
+    return notif('Quantité totale ne peut pas être négative', 'err');
+  }
+  // Vérif Brix / Fermeté / Température
+  const brixVal = G('q-brix').value;
+  if (brixVal !== '' && (isNaN(parseFloat(brixVal)) || parseFloat(brixVal) < 0)) return notif('Brix doit être un nombre positif', 'err');
+  const fermVal = G('q-ferm').value;
+  if (fermVal !== '' && (isNaN(parseFloat(fermVal)) || parseFloat(fermVal) < 0)) return notif('Fermeté doit être un nombre positif', 'err');
+  // Température peut être négative (chambre froide), donc pas de check de signe
   calcDefauts();
   const data = {
     num_lot: numLot,
     date_controle: G('q-date').value || null,
     calibre_cnc: G('q-cal').value || null,
-    brix: G('q-brix').value ? parseFloat(G('q-brix').value) : null,
-    fermete: G('q-ferm').value ? parseFloat(G('q-ferm').value) : null,
+    brix: brixVal ? parseFloat(brixVal) : null,
+    fermete: fermVal ? parseFloat(fermVal) : null,
     temperature: G('q-temp').value ? parseFloat(G('q-temp').value) : null,
     rapport_residus: G('q-resid').value.trim() || null,
     decision_reception: G('q-dec').value || null,
@@ -1758,19 +1999,37 @@ function calcProd() {
 
 async function addProduction(numLot) {
   calcProd();
+  // Validations
+  const v = G('p-vers').value;
+  const s = G('p-sort').value;
+  const f = G('p-fr').value;
+  const vNum = v ? parseFloat(v) : null;
+  const sNum = s ? parseFloat(s) : null;
+  const fNum = f ? parseFloat(f) : 0;
+  if (vNum !== null && (isNaN(vNum) || vNum < 0)) return notif('Quantité versée doit être un nombre positif', 'err');
+  if (sNum !== null && (isNaN(sNum) || sNum < 0)) return notif('Quantité sortie doit être un nombre positif', 'err');
+  if (fNum < 0) return notif('Freinte ne peut pas être négative', 'err');
+  if (fNum > 100) return notif('Freinte > 100% : valeur incohérente', 'err');
+  if (vNum !== null && sNum !== null && sNum > vNum) {
+    return notif('Quantité sortie (' + sNum + ') ne peut pas être supérieure à la quantité versée (' + vNum + ')', 'err');
+  }
   const data = {
     num_lot: numLot,
     operation: G('p-op').value || null,
     date_debut: G('p-deb').value || null,
     date_fin: G('p-fin').value || null,
-    quantite_versee: G('p-vers').value ? parseFloat(G('p-vers').value) : null,
-    quantite_sortie: G('p-sort').value ? parseFloat(G('p-sort').value) : null,
-    freinte_pct: G('p-fr').value ? parseFloat(G('p-fr').value) : 0,
+    quantite_versee: vNum,
+    quantite_sortie: sNum,
+    freinte_pct: fNum,
     poids_net: G('p-net').value ? parseFloat(G('p-net').value) : null,
     perte: G('p-perte').value ? parseFloat(G('p-perte').value) : null,
     ecart_pct: G('p-ecart').value ? parseFloat(G('p-ecart').value) : null,
     type_conditionnement: G('p-cond').value.trim() || null
   };
+  // Validation dates si les deux sont renseignées
+  if (data.date_debut && data.date_fin && new Date(data.date_fin) < new Date(data.date_debut)) {
+    return notif('Date fin ne peut pas être avant date début', 'err');
+  }
   try {
     loader(true);
     await db('POST', 'suivi_production', data);
@@ -1843,13 +2102,22 @@ function calcSejour() {
 
 async function addExpedition(numLot) {
   calcSejour();
+  const qteVal = G('e-qte').value;
+  if (qteVal !== '' && (isNaN(parseFloat(qteVal)) || parseFloat(qteVal) <= 0)) {
+    return notif('Quantité expédiée doit être un nombre positif', 'err');
+  }
+  const dateExp = G('e-date').value;
+  const dateRec = G('e-recep').value;
+  if (dateExp && dateRec && new Date(dateExp) < new Date(dateRec)) {
+    return notif("Date d'expédition ne peut pas être avant la date de réception", 'err');
+  }
   const data = {
     num_lot: numLot,
     num_lot_pf_ref: G('e-lotpf').value || null,
-    date_expedition: G('e-date').value || null,
+    date_expedition: dateExp || null,
     client: G('e-cli').value.trim() || null,
     destination: G('e-dest').value.trim() || null,
-    quantite_expediee: G('e-qte').value ? parseFloat(G('e-qte').value) : null,
+    quantite_expediee: qteVal ? parseFloat(qteVal) : null,
     temps_sejour: G('e-sej').value ? parseInt(G('e-sej').value) : null
   };
   try {
@@ -1967,19 +2235,34 @@ function printLotR(numLot) {
   const lot = allLotsR.find(l => l.num_lot === numLot);
   if (!lot) return;
   const q = allQualite.find(x => x.num_lot === numLot);
+  const qrContent = (lot.lien_fiche && lot.lien_fiche.trim()) ? lot.lien_fiche.trim() : numLot;
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>Fiche Lot ${numLot}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
     <style>
       body{font-family:Arial,sans-serif;padding:20mm;color:#0F172A}
       h1{color:#1A4731;border-bottom:3px solid #2D6A4F;padding-bottom:8px}
+      .top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+      .top-left{flex:1;min-width:300px}
       .num{font-family:monospace;font-size:22px;font-weight:bold;color:#1A4731;background:#F0FAF2;padding:10px 16px;border-radius:8px;display:inline-block;margin:10px 0;letter-spacing:1px}
+      #qrBox{padding:10px;background:white;border:1px solid #CBD5E1;border-radius:8px}
+      .qr-caption{font-size:10px;color:#64748B;text-align:center;margin-top:6px;max-width:160px;word-break:break-all}
       table{width:100%;border-collapse:collapse;margin-top:14px}
       th,td{padding:8px 10px;border:1px solid #CBD5E1;text-align:left;font-size:12px}
       th{background:#F0FAF2;font-weight:700;color:#1A4731;width:30%}
       .footer{margin-top:30px;font-size:10px;color:#64748B;text-align:center}
+      @media print { body { padding: 10mm; } }
     </style></head><body>
-    <h1>📥 FICHE LOT RÉCEPTION</h1>
-    <div class="num">${esc(numLot)}</div>
+    <div class="top">
+      <div class="top-left">
+        <h1>📥 FICHE LOT RÉCEPTION</h1>
+        <div class="num">${esc(numLot)}</div>
+      </div>
+      <div>
+        <div id="qrBox"></div>
+        <div class="qr-caption">${qrContent === numLot ? 'N° Lot' : 'Lien Drive'}</div>
+      </div>
+    </div>
     <table>
       <tr><th>Date Réception</th><td>${fmtDate(lot.date_reception)}</td></tr>
       <tr><th>Produit</th><td>${esc(lot.produit || '—')}</td></tr>
@@ -1997,7 +2280,21 @@ function printLotR(numLot) {
       <tr><th>% Défauts</th><td>${q?.pct_defauts ? fmtNum(q.pct_defauts, 2) + '%' : '—'}</td></tr>
     </table>
     <div class="footer">QUALI-FLEG · Filiale Les Domaines Agricoles · ${new Date().toLocaleString('fr-FR')}</div>
-    <script>window.print();<\/script>
+    <script>
+      window.addEventListener('load', function() {
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(document.getElementById('qrBox'), {
+            text: ${JSON.stringify(qrContent)},
+            width: 140, height: 140,
+            colorDark: '#0A1F11', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          setTimeout(function() { window.print(); }, 350);
+        } else {
+          setTimeout(function() { window.print(); }, 100);
+        }
+      });
+    <\/script>
   </body></html>`);
   w.document.close();
 }
@@ -2005,19 +2302,34 @@ function printLotR(numLot) {
 function printLotPF(numLotPF) {
   const lot = allLotsPF.find(l => l.num_lot_pf === numLotPF);
   if (!lot) return;
+  const qrContent = (lot.lien_fiche_pf && lot.lien_fiche_pf.trim()) ? lot.lien_fiche_pf.trim() : numLotPF;
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html><head><title>Fiche Lot PF ${numLotPF}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
     <style>
       body{font-family:Arial,sans-serif;padding:20mm;color:#0F172A}
       h1{color:#5b21b6;border-bottom:3px solid #7c3aed;padding-bottom:8px}
+      .top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+      .top-left{flex:1;min-width:300px}
       .num{font-family:monospace;font-size:22px;font-weight:bold;color:#5b21b6;background:#EDE9FE;padding:10px 16px;border-radius:8px;display:inline-block;margin:10px 0;letter-spacing:1px}
+      #qrBox{padding:10px;background:white;border:1px solid #CBD5E1;border-radius:8px}
+      .qr-caption{font-size:10px;color:#64748B;text-align:center;margin-top:6px;max-width:160px;word-break:break-all}
       table{width:100%;border-collapse:collapse;margin-top:14px}
       th,td{padding:8px 10px;border:1px solid #CBD5E1;text-align:left;font-size:12px}
       th{background:#EDE9FE;font-weight:700;color:#5b21b6;width:30%}
       .footer{margin-top:30px;font-size:10px;color:#64748B;text-align:center}
+      @media print { body { padding: 10mm; } }
     </style></head><body>
-    <h1>🏷️ FICHE LOT PRODUIT FINI</h1>
-    <div class="num">${esc(numLotPF)}</div>
+    <div class="top">
+      <div class="top-left">
+        <h1>🏷️ FICHE LOT PRODUIT FINI</h1>
+        <div class="num">${esc(numLotPF)}</div>
+      </div>
+      <div>
+        <div id="qrBox"></div>
+        <div class="qr-caption">${qrContent === numLotPF ? 'N° Lot PF' : 'Lien Drive'}</div>
+      </div>
+    </div>
     <table>
       <tr><th>Date Contrôle</th><td>${fmtDate(lot.date_controle_pf)}</td></tr>
       <tr><th>Produit</th><td>${esc(lot.produit || '—')}</td></tr>
@@ -2037,7 +2349,21 @@ function printLotPF(numLotPF) {
       <tr><th>Observations</th><td>${esc(lot.observations_pf || '—')}</td></tr>
     </table>
     <div class="footer">QUALI-FLEG · Filiale Les Domaines Agricoles · ${new Date().toLocaleString('fr-FR')}</div>
-    <script>window.print();<\/script>
+    <script>
+      window.addEventListener('load', function() {
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(document.getElementById('qrBox'), {
+            text: ${JSON.stringify(qrContent)},
+            width: 140, height: 140,
+            colorDark: '#5b21b6', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          setTimeout(function() { window.print(); }, 350);
+        } else {
+          setTimeout(function() { window.print(); }, 100);
+        }
+      });
+    <\/script>
   </body></html>`);
   w.document.close();
 }
@@ -2053,7 +2379,9 @@ function exportLotsRPDF() {
   doc.setTextColor(100);
   doc.text(`Édité le ${new Date().toLocaleString('fr-FR')} · ${allLotsR.length} lot(s)`, 14, 22);
   const rows = allLotsR.map(l => {
-    const q = allQualite.find(x => x.num_lot === l.num_lot);
+    // Prendre le contrôle qualité LE PLUS RÉCENT (le plus représentatif)
+    const qs = allQualite.filter(x => x.num_lot === l.num_lot);
+    const q = qs.length ? qs.reduce((a, b) => (new Date(a.created_at || 0) > new Date(b.created_at || 0) ? a : b)) : null;
     return [
       l.num_lot || '',
       fmtDate(l.date_reception),
@@ -2112,7 +2440,7 @@ function exportLotsPFPDF() {
 function exportLotRPDF(numLot) {
   const lot = allLotsR.find(l => l.num_lot === numLot);
   if (!lot) return;
-  const q = allQualite.find(x => x.num_lot === numLot);
+  const qList = allQualite.filter(x => x.num_lot === numLot);
   const pList = allProduction.filter(p => p.num_lot === numLot);
   const eList = allExpedition.filter(e => e.num_lot === numLot);
   const iList = allIncidents.filter(i => i.num_lot === numLot);
@@ -2142,19 +2470,24 @@ function exportLotRPDF(numLot) {
   });
   y = doc.lastAutoTable.finalY + 8;
 
-  if (q) {
-    doc.text('AGRÉAGE QUALITÉ', 14, y);
+  if (qList.length) {
+    doc.text(`AGRÉAGE QUALITÉ (${qList.length} contrôle${qList.length > 1 ? 's' : ''})`, 14, y);
     y += 4;
     doc.autoTable({
       startY: y,
-      body: [
-        ['Date contrôle', fmtDate(q.date_controle), 'Décision', q.decision_reception || '—'],
-        ['% Défauts', fmtNum(q.pct_defauts, 2) + '%', 'Calibre', q.calibre_cnc || '—'],
-        ['Brix', fmtNum(q.brix, 1), 'Fermeté', fmtNum(q.fermete, 1)],
-        ['Température', fmtNum(q.temperature, 1) + ' °C', 'Rapport résidus', q.rapport_residus || '—']
-      ],
-      bodyStyles: { fontSize: 9 },
-      columnStyles: { 0: { fontStyle: 'bold', fillColor: [240, 250, 242] }, 2: { fontStyle: 'bold', fillColor: [240, 250, 242] } }
+      head: [['Date', 'Décision', '% Déf.', 'Calibre', 'Brix', 'Fermeté', 'Temp.°C', 'Rapport résidus']],
+      body: qList.map(q => [
+        fmtDate(q.date_controle),
+        q.decision_reception || '—',
+        fmtNum(q.pct_defauts, 2) + '%',
+        q.calibre_cnc || '—',
+        fmtNum(q.brix, 1),
+        fmtNum(q.fermete, 1),
+        fmtNum(q.temperature, 1),
+        q.rapport_residus || '—'
+      ]),
+      headStyles: { fillColor: [26, 71, 49], fontSize: 8 },
+      bodyStyles: { fontSize: 8 }
     });
     y = doc.lastAutoTable.finalY + 8;
   }
@@ -2293,7 +2626,9 @@ function exportAllPDF() {
 // ── EXPORT EXCEL ────────────────────────────────────────
 function exportLotsRExcel() {
   const data = allLotsR.map(l => {
-    const q = allQualite.find(x => x.num_lot === l.num_lot);
+    // Prendre le contrôle qualité LE PLUS RÉCENT
+    const qs = allQualite.filter(x => x.num_lot === l.num_lot);
+    const q = qs.length ? qs.reduce((a, b) => (new Date(a.created_at || 0) > new Date(b.created_at || 0) ? a : b)) : null;
     return {
       'N° Lot': l.num_lot,
       'Date Réception': l.date_reception,
