@@ -1406,7 +1406,11 @@ function renderLotDetailR(lot) {
       <div class="qr-box"><div id="qrLot"></div></div>
       <div class="qr-info">
         <h4>QR Code de traçabilité</h4>
-        <p>Scannez ce code pour accéder à toutes les informations du lot. Imprimez-le et collez-le sur le conditionnement.</p>
+        ${lot.lien_fiche && lot.lien_fiche.trim() ? `
+          <p>✅ Ce QR pointe vers <strong>la fiche Google Drive</strong>. Scannez pour ouvrir directement la fiche.</p>
+        ` : `
+          <p>⚠️ <strong>Aucun lien Google Drive renseigné</strong> — le QR affichera seulement le N° de lot. Pour une fiche détaillée, modifiez ce lot et ajoutez le lien Drive.</p>
+        `}
         <button class="btn btn-secondary btn-sm" onclick="printLotR('${esc(numLot)}')">🖨️ Imprimer la fiche</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadQR('qrLot','${esc(numLot)}')">⬇️ Télécharger QR</button>
         <button class="btn btn-secondary btn-sm" onclick="exportLotRPDF('${esc(numLot)}')">📄 Export PDF</button>
@@ -1454,11 +1458,12 @@ function renderLotDetailR(lot) {
     ${renderSectionIncidents(numLot, iList)}
   `;
 
-  // Generate QR
+  // Generate QR — priorité au lien Drive, sinon fallback sur N° lot
   setTimeout(() => {
     G('qrLot').innerHTML = '';
+    const qrText = (lot.lien_fiche && lot.lien_fiche.trim()) ? lot.lien_fiche.trim() : numLot;
     new QRCode(G('qrLot'), {
-      text: numLot,
+      text: qrText,
       width: 140,
       height: 140,
       colorDark: '#0A1F11',
@@ -1488,7 +1493,11 @@ function renderLotDetailPF(lot) {
       <div class="qr-box"><div id="qrLotPF"></div></div>
       <div class="qr-info">
         <h4>QR Code Lot PF</h4>
-        <p>Scannez pour accéder à la fiche complète du lot PF. Code à apposer sur le conditionnement final.</p>
+        ${lot.lien_fiche_pf && lot.lien_fiche_pf.trim() ? `
+          <p>✅ Ce QR pointe vers <strong>la fiche PF Google Drive</strong>. À apposer sur le conditionnement client.</p>
+        ` : `
+          <p>⚠️ <strong>Aucun lien Google Drive renseigné</strong> — le QR affichera seulement le N° de lot PF. Pour une fiche détaillée, modifiez ce lot et ajoutez le lien Drive.</p>
+        `}
         <button class="btn btn-secondary btn-sm" onclick="printLotPF('${esc(numLotPF)}')">🖨️ Imprimer</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadQR('qrLotPF','${esc(numLotPF)}')">⬇️ Télécharger QR</button>
         <button class="btn btn-secondary btn-sm" onclick="exportLotPFPDF('${esc(numLotPF)}')">📄 Export PDF</button>
@@ -1522,8 +1531,9 @@ function renderLotDetailPF(lot) {
 
   setTimeout(() => {
     G('qrLotPF').innerHTML = '';
+    const qrText = (lot.lien_fiche_pf && lot.lien_fiche_pf.trim()) ? lot.lien_fiche_pf.trim() : numLotPF;
     new QRCode(G('qrLotPF'), {
-      text: numLotPF,
+      text: qrText,
       width: 140,
       height: 140,
       colorDark: '#5b21b6',
