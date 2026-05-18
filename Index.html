@@ -1394,9 +1394,10 @@ function renderDashboard() {
   const incOuverts = allIncidents.filter(i => i.statut === 'Ouvert' || i.statut === 'En cours').length;
 
   // % défauts moyen pondéré par les quantités reçues (statistiquement correct)
+  // On prend le contrôle qualité LE PLUS RÉCENT de chaque lot (déjà calculé : lastDecisionPerLot)
   let totalDefKg = 0;
   let totalQteKg = 0;
-  allQualite.forEach(q => {
+  Object.values(lastDecisionPerLot).forEach(q => {
     if (q.pct_defauts === null || q.pct_defauts === undefined) return;
     const lot = allLotsR.find(l => l.num_lot === q.num_lot);
     const qte = parseFloat(lot?.quantite_recue) || 0;
@@ -1793,58 +1794,58 @@ function renderSectionQualite(numLot, items) {
         <div class="fg"><label>Décision</label>
           <select class="fc" id="q-dec"><option value="">—</option><option>ACCEPTÉ</option><option>NON ACCEPTÉ</option><option>À VALIDER</option></select>
         </div>
-        <div class="fg"><label>Total quantité (kg)</label><input class="fc" id="q-totqte" type="number" step="0.01" placeholder="Pour % défauts"></div>
+        <div class="fg"><label>Quantité contrôlée (kg)</label><input class="fc" id="q-totqte" type="number" step="0.01" min="0" placeholder="Informatif (optionnel)"></div>
       </div>
 
-      <div style="font-weight:700;color:var(--g2);margin:14px 0 8px;font-size:13px">⚠️ Défauts mineurs (kg)</div>
+      <div style="font-weight:700;color:var(--g2);margin:14px 0 8px;font-size:13px">⚠️ Défauts mineurs (%)</div>
       <div class="defauts-grid">
-        <div class="def-cell"><label>Déformation</label><input id="q-d1" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Blessure</label><input id="q-d2" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Coloration</label><input id="q-d3" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Saleté</label><input id="q-d4" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Caisse défectueuse</label><input id="q-d5" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Coup de soleil</label><input id="q-d6" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Marbrure</label><input id="q-d7" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Maturité hétér.</label><input id="q-d8" type="number" step="0.01" min="0" placeholder="0"></div>
+        <div class="def-cell"><label>Déformation</label><input id="q-d1" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Blessure</label><input id="q-d2" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Coloration</label><input id="q-d3" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Saleté</label><input id="q-d4" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Caisse défectueuse</label><input id="q-d5" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Coup de soleil</label><input id="q-d6" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Marbrure</label><input id="q-d7" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Maturité hétér.</label><input id="q-d8" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
       </div>
 
-      <div style="font-weight:700;color:var(--red-d);margin:14px 0 8px;font-size:13px">🚨 Défauts majeurs (kg)</div>
+      <div style="font-weight:700;color:var(--red-d);margin:14px 0 8px;font-size:13px">🚨 Défauts majeurs (%)</div>
       <div class="defauts-grid">
-        <div class="def-cell"><label>Sur-maturité</label><input id="q-d9" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Manque fraîcheur</label><input id="q-d10" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Fumagine</label><input id="q-d11" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Cochenille</label><input id="q-d12" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Éclatement</label><input id="q-d13" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Noircissement</label><input id="q-d14" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>Pourriture</label><input id="q-d15" type="number" step="0.01" min="0" placeholder="0"></div>
-        <div class="def-cell"><label>% Défauts (auto)</label><input id="q-pct" class="calc" readonly placeholder="0.00"></div>
+        <div class="def-cell"><label>Sur-maturité</label><input id="q-d9" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Manque fraîcheur</label><input id="q-d10" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Fumagine</label><input id="q-d11" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Cochenille</label><input id="q-d12" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Éclatement</label><input id="q-d13" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Noircissement</label><input id="q-d14" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>Pourriture</label><input id="q-d15" type="number" step="0.01" min="0" max="100" placeholder="0" oninput="calcDefauts()"></div>
+        <div class="def-cell"><label>% Défauts total (auto)</label><input id="q-pct" class="calc" readonly placeholder="0.00"></div>
       </div>
+
+      <div class="calc-hint">💡 <strong>% Défauts total</strong> = somme de tous les défauts ci-dessus (chaque défaut est exprimé en %).</div>
 
       <div class="form-grid" style="margin-top:14px">
         <div class="fg full"><label>Commentaires</label><textarea class="fc" id="q-com" placeholder="Observations qualité..."></textarea></div>
       </div>
 
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-secondary btn-sm" onclick="calcDefauts()">🔄 Calculer % défauts</button>
+        <button class="btn btn-secondary btn-sm" onclick="calcDefauts()">🔄 Recalculer le total</button>
         <button class="btn btn-primary btn-sm" onclick="addQualite('${esc(numLot)}')">+ Ajouter ce contrôle</button>
       </div>
     </div>
 
     <div class="timeline">
       ${items.length ? items.map(r => {
-        const totalDef = (parseFloat(r.def_deformation)||0)+(parseFloat(r.def_blessure)||0)+(parseFloat(r.def_coloration)||0)+(parseFloat(r.def_salete)||0)+(parseFloat(r.def_caisse)||0)+(parseFloat(r.def_coup_soleil)||0)+(parseFloat(r.def_marbrure)||0)+(parseFloat(r.def_maturite_het)||0)+(parseFloat(r.def_sur_maturite)||0)+(parseFloat(r.def_manque_fraicheur)||0)+(parseFloat(r.def_fumagine)||0)+(parseFloat(r.def_cochenille)||0)+(parseFloat(r.def_eclatement)||0)+(parseFloat(r.def_noircissement)||0)+(parseFloat(r.def_pourriture)||0);
         const pctClass = parseFloat(r.pct_defauts) > 10 ? 'b-red' : parseFloat(r.pct_defauts) > 5 ? 'b-amber' : 'b-green';
         return `<div class="tl-item">
           <div class="tl-dot">✓</div>
           <div class="tl-content">
-            <div class="tl-title">${badgeDecision(r.decision_reception)} · <span class="badge ${pctClass}">% Défauts: ${fmtNum(r.pct_defauts, 2)}%</span></div>
+            <div class="tl-title">${badgeDecision(r.decision_reception)} · <span class="badge ${pctClass}">% Défauts total: ${fmtNum(r.pct_defauts, 2)}%</span></div>
             <div class="tl-meta">
               <span>📅 ${fmtDate(r.date_controle)}</span>
               <span>📏 Calibre: ${esc(r.calibre_cnc || '—')}</span>
               <span>🍯 Brix: ${fmtNum(r.brix, 1)}</span>
               <span>💪 Fermeté: ${fmtNum(r.fermete, 1)}</span>
               <span>🌡️ Temp: ${fmtNum(r.temperature, 1)}°C</span>
-              <span>⚖️ Total déf: ${fmtNum(totalDef, 2)} kg</span>
             </div>
             ${r.commentaires ? `<div style="font-size:12px;color:var(--s600);margin-top:6px">💬 ${esc(r.commentaires)}</div>` : ''}
           </div>
@@ -1856,17 +1857,13 @@ function renderSectionQualite(numLot, items) {
 }
 
 function calcDefauts() {
-  const total = parseFloat(G('q-totqte').value) || 0;
+  // Le % défauts est la SOMME directe des 15 défauts (chacun exprimé en %)
   let som = 0;
   for (let i = 1; i <= 15; i++) {
     som += parseFloat(G('q-d' + i).value) || 0;
   }
-  if (total > 0) {
-    G('q-pct').value = ((som / total) * 100).toFixed(2);
-  } else {
-    G('q-pct').value = '';
-    notif('Saisis la quantité totale pour calculer le %', 'warn');
-  }
+  G('q-pct').value = som.toFixed(2);
+  return som;
 }
 
 async function addQualite(numLot) {
@@ -1876,6 +1873,11 @@ async function addQualite(numLot) {
     if (v !== '' && parseFloat(v) < 0) {
       return notif('Les défauts ne peuvent pas être négatifs', 'err');
     }
+  }
+  // Le % défauts = somme des 15 pourcentages ; blocage si > 100%
+  const sommeDef = calcDefauts();
+  if (sommeDef > 100) {
+    return notif('La somme des défauts dépasse 100% (' + sommeDef.toFixed(2) + '%) — vérifiez vos saisies', 'err');
   }
   // Vérif totale
   const totalVal = G('q-totqte').value;
@@ -1888,7 +1890,6 @@ async function addQualite(numLot) {
   const fermVal = G('q-ferm').value;
   if (fermVal !== '' && (isNaN(parseFloat(fermVal)) || parseFloat(fermVal) < 0)) return notif('Fermeté doit être un nombre positif', 'err');
   // Température peut être négative (chambre froide), donc pas de check de signe
-  calcDefauts();
   const data = {
     num_lot: numLot,
     date_controle: G('q-date').value || null,
@@ -1933,7 +1934,7 @@ function renderSectionProduction(numLot, items) {
   return `<div class="lot-section" id="ls-production">
     <div class="inline-form">
       <div style="font-weight:700;color:var(--g2);margin-bottom:10px;font-size:13px">⚙️ Nouvelle opération de production</div>
-      <div class="calc-hint">💡 <strong>Formules auto:</strong> Poids Net = Sortie × (1 + Freinte/100) · Perte = Versée − Sortie · Écart% = (Versée − Sortie) / Versée × 100</div>
+      <div class="calc-hint">💡 <strong>Formules auto:</strong> Poids Net = Sortie × (1 + Freinte commerciale/100) · Perte = Versée − Poids Net · Écart% = (Versée − Poids Net) / Versée × 100</div>
       <div class="inline-form-grid">
         <div class="fg"><label>Opération</label>
           <select class="fc" id="p-op"><option value="">—</option><option>Triage</option><option>Reconditionnement</option><option>Stockage</option><option>Conditionnement</option><option>Refroidissement</option><option>Calibrage</option><option>Lavage</option></select>
@@ -1945,7 +1946,7 @@ function renderSectionProduction(numLot, items) {
       <div class="inline-form-grid">
         <div class="fg"><label>Quantité versée (kg)</label><input class="fc" id="p-vers" type="number" step="0.01" min="0" oninput="calcProd()"></div>
         <div class="fg"><label>Quantité sortie (kg)</label><input class="fc" id="p-sort" type="number" step="0.01" min="0" oninput="calcProd()"></div>
-        <div class="fg"><label>Freinte (%)</label><input class="fc" id="p-fr" type="number" step="0.01" min="0" placeholder="0" oninput="calcProd()"></div>
+        <div class="fg"><label>Freinte commerciale (%)</label><input class="fc" id="p-fr" type="number" step="0.01" min="0" placeholder="0" oninput="calcProd()"></div>
         <div class="fg"><label>Poids net (auto)</label><input class="fc calc" id="p-net" readonly></div>
       </div>
       <div class="inline-form-grid">
@@ -1962,7 +1963,7 @@ function renderSectionProduction(numLot, items) {
         return `<div class="tl-item">
           <div class="tl-dot">⚙️</div>
           <div class="tl-content">
-            <div class="tl-title">${esc(r.operation || '—')} · <span class="badge ${ecartClass}">Écart: ${fmtNum(r.ecart_pct, 2)}%</span> <span class="badge ${freinteClass}">Freinte: ${fmtNum(r.freinte_pct, 2)}%</span></div>
+            <div class="tl-title">${esc(r.operation || '—')} · <span class="badge ${ecartClass}">Écart: ${fmtNum(r.ecart_pct, 2)}%</span> <span class="badge ${freinteClass}">Freinte comm.: ${fmtNum(r.freinte_pct, 2)}%</span></div>
             <div class="tl-meta">
               <span>📅 ${fmtDate(r.date_debut)} → ${fmtDate(r.date_fin)}</span>
               <span>📥 Versée: ${fmtNum(r.quantite_versee, 0)} kg</span>
@@ -1984,14 +1985,19 @@ function calcProd() {
   const s = parseFloat(G('p-sort').value) || 0;
   const f = parseFloat(G('p-fr').value) || 0;
   if (s > 0) {
-    G('p-net').value = (s * (1 + f / 100)).toFixed(2);
+    // Poids Net = Sortie majorée de la freinte commerciale
+    const poidsNet = s * (1 + f / 100);
+    G('p-net').value = poidsNet.toFixed(2);
+    if (v > 0) {
+      // Perte et Écart calculés à partir du Poids Net (la freinte commerciale réduit l'écart)
+      G('p-perte').value = (v - poidsNet).toFixed(2);
+      G('p-ecart').value = (((v - poidsNet) / v) * 100).toFixed(2);
+    } else {
+      G('p-perte').value = '';
+      G('p-ecart').value = '';
+    }
   } else {
     G('p-net').value = '';
-  }
-  if (v > 0 && s > 0) {
-    G('p-perte').value = (v - s).toFixed(2);
-    G('p-ecart').value = (((v - s) / v) * 100).toFixed(2);
-  } else {
     G('p-perte').value = '';
     G('p-ecart').value = '';
   }
@@ -2008,8 +2014,8 @@ async function addProduction(numLot) {
   const fNum = f ? parseFloat(f) : 0;
   if (vNum !== null && (isNaN(vNum) || vNum < 0)) return notif('Quantité versée doit être un nombre positif', 'err');
   if (sNum !== null && (isNaN(sNum) || sNum < 0)) return notif('Quantité sortie doit être un nombre positif', 'err');
-  if (fNum < 0) return notif('Freinte ne peut pas être négative', 'err');
-  if (fNum > 100) return notif('Freinte > 100% : valeur incohérente', 'err');
+  if (fNum < 0) return notif('Freinte commerciale ne peut pas être négative', 'err');
+  if (fNum > 100) return notif('Freinte commerciale > 100% : valeur incohérente', 'err');
   if (vNum !== null && sNum !== null && sNum > vNum) {
     return notif('Quantité sortie (' + sNum + ') ne peut pas être supérieure à la quantité versée (' + vNum + ')', 'err');
   }
@@ -2497,7 +2503,7 @@ function exportLotRPDF(numLot) {
     y += 4;
     doc.autoTable({
       startY: y,
-      head: [['Opération', 'Début', 'Fin', 'Versée', 'Sortie', 'Freinte', 'Net', 'Écart%']],
+      head: [['Opération', 'Début', 'Fin', 'Versée', 'Sortie', 'Freinte comm.', 'Net', 'Écart%']],
       body: pList.map(p => [p.operation || '—', fmtDate(p.date_debut), fmtDate(p.date_fin), fmtNum(p.quantite_versee, 0), fmtNum(p.quantite_sortie, 0), fmtNum(p.freinte_pct, 1) + '%', fmtNum(p.poids_net, 0), fmtNum(p.ecart_pct, 1) + '%']),
       headStyles: { fillColor: [26, 71, 49], fontSize: 8 },
       bodyStyles: { fontSize: 8 }
@@ -2715,7 +2721,7 @@ function exportAllExcel() {
   // Production
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allProduction.map(p => ({
     'N° Lot': p.num_lot, 'Opération': p.operation, 'Début': p.date_debut, 'Fin': p.date_fin,
-    'Versée': p.quantite_versee, 'Sortie': p.quantite_sortie, 'Freinte %': p.freinte_pct,
+    'Versée': p.quantite_versee, 'Sortie': p.quantite_sortie, 'Freinte commerciale %': p.freinte_pct,
     'Poids Net': p.poids_net, 'Perte': p.perte, 'Écart %': p.ecart_pct, 'Cond.': p.type_conditionnement
   }))), 'Production');
   // Expédition
